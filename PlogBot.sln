@@ -1,0 +1,61 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2036
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlogBot.App", "PlogBot.App\PlogBot.App.csproj", "{80EC9328-A925-4AEF-AA49-3608CEBD4485}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlogBot.Processing", "PlogBot.Processing\PlogBot.Processing.csproj", "{FB0EA3CA-61C8-428E-BC8D-79540EE8B752}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlogBot.Listening", "PlogBot.Listening\PlogBot.Listening.csproj", "{7BA1AE36-8F51-4256-B6E0-403C756AFCBB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlogBot.Services", "PlogBot.Services\PlogBot.Services.csproj", "{0E4B86F8-248B-42BE-A7EF-4551A01B9DDA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlogBot.Data", "PlogBot.Data\PlogBot.Data.csproj", "{E2FC39AE-F9D4-402E-893A-244520177CFB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlogBot.OAuth2", "PlogBot.OAuth2\PlogBot.OAuth2.csproj", "{A96A47C3-150C-4900-A963-E76AC4241060}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlogBot.Configuration", "PlogBot.Configuration\PlogBot.Configuration.csproj", "{17CB31D6-47E9-48FF-859B-503DC1E8C3D9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{80EC9328-A925-4AEF-AA49-3608CEBD4485}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80EC9328-A925-4AEF-AA49-3608CEBD4485}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80EC9328-A925-4AEF-AA49-3608CEBD4485}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80EC9328-A925-4AEF-AA49-3608CEBD4485}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB0EA3CA-61C8-428E-BC8D-79540EE8B752}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB0EA3CA-61C8-428E-BC8D-79540EE8B752}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB0EA3CA-61C8-428E-BC8D-79540EE8B752}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB0EA3CA-61C8-428E-BC8D-79540EE8B752}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7BA1AE36-8F51-4256-B6E0-403C756AFCBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BA1AE36-8F51-4256-B6E0-403C756AFCBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7BA1AE36-8F51-4256-B6E0-403C756AFCBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7BA1AE36-8F51-4256-B6E0-403C756AFCBB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E4B86F8-248B-42BE-A7EF-4551A01B9DDA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E4B86F8-248B-42BE-A7EF-4551A01B9DDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E4B86F8-248B-42BE-A7EF-4551A01B9DDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E4B86F8-248B-42BE-A7EF-4551A01B9DDA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2FC39AE-F9D4-402E-893A-244520177CFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2FC39AE-F9D4-402E-893A-244520177CFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2FC39AE-F9D4-402E-893A-244520177CFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2FC39AE-F9D4-402E-893A-244520177CFB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A96A47C3-150C-4900-A963-E76AC4241060}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A96A47C3-150C-4900-A963-E76AC4241060}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A96A47C3-150C-4900-A963-E76AC4241060}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A96A47C3-150C-4900-A963-E76AC4241060}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17CB31D6-47E9-48FF-859B-503DC1E8C3D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17CB31D6-47E9-48FF-859B-503DC1E8C3D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17CB31D6-47E9-48FF-859B-503DC1E8C3D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17CB31D6-47E9-48FF-859B-503DC1E8C3D9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EC5F6EF2-E1EB-4C01-B02E-4212D2E24BCF}
+	EndGlobalSection
+EndGlobal
