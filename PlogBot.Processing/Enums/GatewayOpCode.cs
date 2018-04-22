@@ -1,4 +1,4 @@
-﻿namespace PlogBot.OAuth2.Enums
+﻿namespace PlogBot.Processing.Enums
 {
     public enum GatewayOpCode
     {

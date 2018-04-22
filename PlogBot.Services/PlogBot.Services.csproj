@@ -12,4 +12,8 @@
     <ProjectReference Include="..\PlogBot.OAuth2\PlogBot.OAuth2.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Communication\" />
+  </ItemGroup>
+
 </Project>
