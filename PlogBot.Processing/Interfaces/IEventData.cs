@@ -5,6 +5,6 @@ namespace PlogBot.Processing.Interfaces
 {
     public interface IEventData
     {
-        Task Respond(ClientWebSocket ws, int sequenceNum, string token);
+        Task RespondAsync(ClientWebSocket ws, Payload payload, string token);
     }
 }

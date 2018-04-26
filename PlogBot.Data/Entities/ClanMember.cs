@@ -16,6 +16,8 @@ namespace PlogBot.Data.Entities
 
         public string RealName { get; set; }
 
+        public ulong? DiscordId { get; set; }
+
         public CharacterClass Class { get; set; }
 
         public Guid? MainId { get; set; }

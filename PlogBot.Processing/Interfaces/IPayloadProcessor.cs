@@ -1,11 +1,10 @@
-﻿using System;
+﻿using System.Net.WebSockets;
+using System.Threading.Tasks;
 
 namespace PlogBot.Processing.Interfaces
 {
     public interface IPayloadProcessor
     {
-        IEventData Process(string streamData);
-
-        int GetLastSequenceNumber();
+        Task Process(string streamData, ClientWebSocket ws);
     }
 }

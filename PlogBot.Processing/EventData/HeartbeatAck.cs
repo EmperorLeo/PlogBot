@@ -9,7 +9,7 @@ namespace PlogBot.Processing.EventData
     {
         public static DateTime? LastHeartbeatRecieved { get; set; }
 
-        public Task Respond(ClientWebSocket ws, int sequenceNum, string token)
+        public Task RespondAsync(ClientWebSocket ws, Payload payload, string token)
         {
             LastHeartbeatRecieved = DateTime.UtcNow;
             Console.WriteLine("Processed heartbeat ACK.");

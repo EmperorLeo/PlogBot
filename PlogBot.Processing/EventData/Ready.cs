@@ -21,7 +21,7 @@ namespace PlogBot.Processing.EventData
         [JsonProperty("_trace")]
         public string[] Trace { get; set; }
 
-        public Task Respond(ClientWebSocket ws, int sequenceNum, string token)
+        public Task RespondAsync(ClientWebSocket ws, Payload payload, string token)
         {
             throw new NotImplementedException();
         }

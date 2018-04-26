@@ -9,4 +9,10 @@
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\PlogBot.Configuration\PlogBot.Configuration.csproj" />
+    <ProjectReference Include="..\PlogBot.Data\PlogBot.Data.csproj" />
+    <ProjectReference Include="..\PlogBot.Services\PlogBot.Services.csproj" />
+  </ItemGroup>
+
 </Project>

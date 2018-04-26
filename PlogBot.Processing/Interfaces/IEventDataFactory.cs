@@ -1,7 +1,9 @@
-﻿namespace PlogBot.Processing.Interfaces
+﻿using Microsoft.Extensions.DependencyInjection;
+
+namespace PlogBot.Processing.Interfaces
 {
     public interface IEventDataFactory
     {
-        IEventData BuildEventData(int opcode, string data);
+        IEventData BuildEventData(IServiceScope scope, int opcode, string data);
     }
 }

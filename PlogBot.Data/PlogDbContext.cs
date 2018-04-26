@@ -11,6 +11,10 @@ namespace PlogBot.Data
         public DbSet<ClanMember> Plogs { get; set; }
         public DbSet<ClanMemberStatLog> Logs { get; set; }
 
+        public PlogDbContext() { }
+
+        public PlogDbContext(DbContextOptions<PlogDbContext> dbContextOptions) : base(dbContextOptions) { }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var sqliteFilePath = Path.Combine(Environment.GetEnvironmentVariable(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "LocalAppData" : "Home"), @"PlogBot\plog.db");

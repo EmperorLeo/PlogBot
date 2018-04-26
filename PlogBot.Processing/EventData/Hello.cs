@@ -15,7 +15,16 @@ namespace PlogBot.Processing.EventData
         [JsonProperty("_trace")]
         public string[] Trace { get; set; }
 
-        public async Task Respond(ClientWebSocket ws, int sequenceNum, string token)
+        ~Hello()
+        {
+            Console.WriteLine("*********************");
+            Console.WriteLine("*********************");
+            Console.WriteLine("HELLO SELF DESTRUCTED");
+            Console.WriteLine("*********************");
+            Console.WriteLine("*********************");
+        }
+
+        public async Task RespondAsync(ClientWebSocket ws, Payload payload, string token)
         {
 
             var identify = new Payload {
@@ -32,31 +41,34 @@ namespace PlogBot.Processing.EventData
                 }
             };
 
-
-            var heartbeat = new Payload
-            {
-                Opcode = 1,
-                Data = sequenceNum
-            };
             await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(identify))), WebSocketMessageType.Binary, true, CancellationToken.None);
             Console.WriteLine("Identified the session.");
 
             // Setup task to keep heartbeating
+            var heartbeatCancellationTokenSource = new CancellationTokenSource();
+            var heartbeatCancellationToken = heartbeatCancellationTokenSource.Token;
             var _ = Task.Run(async () =>
             {
                 while (true)
                 {
                     Console.WriteLine("Delaying for heartbeat interval: " + HeartbeatInterval + " ms");
-                    await Task.Delay(HeartbeatInterval);
+                    await Task.Delay(HeartbeatInterval, heartbeatCancellationToken);
                     if (HeartbeatAck.LastHeartbeatRecieved.HasValue && HeartbeatAck.LastHeartbeatRecieved.Value.AddMilliseconds(HeartbeatInterval * 2) < DateTime.UtcNow)
                     {
                         // TODO: try to reconnect?
+                        Console.WriteLine("NEED TO FIGURE OUT HOW TO RECONNECT HERE");
                     }
+                    var heartbeat = new Payload
+                    {
+                        Opcode = 1,
+                        Data = PayloadProcessor.LastSequenceNumber
+                    };
                     var arraySegment = new ArraySegment<byte>(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(heartbeat)));
                     await ws.SendAsync(arraySegment, WebSocketMessageType.Binary, true, CancellationToken.None);
                     Console.WriteLine("Successful heartbeat!");
                 }
-            });
+            }, heartbeatCancellationToken);
+            heartbeatCancellationToken.Register(() => Console.WriteLine("HEARTBEAT WAS CANCELED SOMEHOW!"));
         }
     }
 }

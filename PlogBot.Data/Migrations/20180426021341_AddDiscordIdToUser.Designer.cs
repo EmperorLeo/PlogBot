@@ -12,9 +12,10 @@ using System;
 namespace PlogBot.Data.Migrations
 {
     [DbContext(typeof(PlogDbContext))]
-    partial class PlogDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180426021341_AddDiscordIdToUser")]
+    partial class AddDiscordIdToUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

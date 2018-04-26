@@ -31,25 +31,25 @@ namespace PlogBot.Processing
             //};
         }
 
-        public IEventData BuildEventData(int opcode, string data)
+        public IEventData BuildEventData(IServiceScope scope, int opcode, string data)
         {
             var opcodeVal = (GatewayOpCode)opcode;
             IEventData serialized = null;
             switch (opcodeVal)
             {
                 case GatewayOpCode.Dispatch:
-                    using (var scope = _serviceScopeFactory.CreateScope())
-                    {
-                        var dispatchEventData = scope.ServiceProvider.GetRequiredService<IDispatchEventData>();
-                        dispatchEventData.Initialize(data);
-                        serialized = dispatchEventData;
-                    }
+                    var dispatchEventData = scope.ServiceProvider.GetRequiredService<IDispatchEventData>();
+                    dispatchEventData.Initialize(data);
+                    serialized = dispatchEventData;
                     break;
                 case GatewayOpCode.Hello:
                     serialized = JsonConvert.DeserializeObject<Hello>(data);
                     break;
                 case GatewayOpCode.HeartbeatACK:
                     serialized = new HeartbeatAck();
+                    break;
+                case GatewayOpCode.InvalidSession:
+                    serialized = new InvalidSession();
                     break;
                 default:
                     break;

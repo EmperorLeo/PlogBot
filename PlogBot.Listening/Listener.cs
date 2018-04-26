@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
-using PlogBot.Configuration;
+﻿using Newtonsoft.Json;
 using PlogBot.Listening.Interfaces;
 using PlogBot.Processing.Interfaces;
 using PlogBot.Services.Interfaces;
@@ -21,13 +19,11 @@ namespace PlogBot.Listening
         private readonly IGatewayService _gatewayService;
         private readonly IPayloadProcessor _payloadProcessor;
         private readonly IUtilityService _utilityService;
-        private readonly string _token;
 
-        public Listener(IGatewayService gatewayService, IPayloadProcessor payloadProcessor, IOptions<AppSettings> options, IUtilityService utilityService)
+        public Listener(IGatewayService gatewayService, IPayloadProcessor payloadProcessor, IUtilityService utilityService)
         {
             _gatewayService = gatewayService;
             _payloadProcessor = payloadProcessor;
-            _token = options.Value.BotToken;
             _utilityService = utilityService;
         }
 
@@ -53,8 +49,7 @@ namespace PlogBot.Listening
                         sb.Append(_utilityService.FromArraySegmentBytes(bytesReceived));
                         endOfMessage = result.EndOfMessage;
                     }
-                    var data = _payloadProcessor.Process(sb.ToString());
-                    await data.Respond(ws, _payloadProcessor.GetLastSequenceNumber(), _token);
+                    await _payloadProcessor.Process(sb.ToString(), ws);
                 }
             }
 
