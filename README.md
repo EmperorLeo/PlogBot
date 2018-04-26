@@ -9,7 +9,7 @@ The project is written using C# on top of .NET Core 2.0.
 
 Name | Version | Replacement Plan
 
----------|-------------| --------------------------
+--------- | ------------- | --------------------------
 
 HtmlAgilityPack | 1.8.1 | Write own class to parse HTML efficiently using XML classes and XPath
 
