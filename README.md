@@ -7,13 +7,10 @@ The project is written using C# on top of .NET Core 2.0.
 
 ##### Non-Microsoft Dependencies
 
-Name | Version | Replacement Plan
-
---------- | ------------- | --------------------------
-
-HtmlAgilityPack | 1.8.1 | Write own class to parse HTML efficiently using XML classes and XPath
-
-Newtonsoft.Json | 11.0.2 | None, it's a dependable dependency
+| Name            | Version | Replacement Plan                                             |
+| --------------- | ------- | ------------------------------------------------------------ |
+| HtmlAgilityPack | 1.8.1   | Write own class to parse HTML efficiently using XML classes and XPath |
+| Newtonsoft.Json | 11.0.2  | None, it's a dependable dependency                           |
 
 ### Data Persistence
 PlogBot.Data defines a database context using Entity Framework Core.  Currently, the database is SQLite. This decision was made due to the limited scope of the project, and the ease of using SQLite.
