@@ -6,8 +6,8 @@ using PlogBot.Listening.Interfaces;
 using PlogBot.OAuth2;
 using PlogBot.OAuth2.Interfaces;
 using PlogBot.Processing;
-using PlogBot.Processing.EventData;
-using PlogBot.Processing.EventProcessors;
+using PlogBot.Processing.DispatchEventProcessors;
+using PlogBot.Processing.EventDataServices;
 using PlogBot.Processing.Events;
 using PlogBot.Processing.Interfaces;
 using PlogBot.Services;
@@ -25,6 +25,9 @@ namespace PlogBot.App
             // Listening
             services.AddSingleton<IListener, Listener>();
 
+            // Logging
+            services.AddSingleton<ILoggingService, LoggingService>();
+
             // API Services
             services.AddSingleton<IGatewayService, GatewayService>();
             services.AddSingleton<IUtilityService, UtilityService>();
@@ -36,9 +39,14 @@ namespace PlogBot.App
             services.AddSingleton<IDiscordApiClient, DiscordApiClient>();
 
             // Processing
-            services.AddSingleton<IEventDataFactory, EventDataFactory>();
+            services.AddSingleton<IEventDataServiceFactory, EventDataServiceFactory>();
             services.AddSingleton<IPayloadProcessor, PayloadProcessor>();
-            services.AddScoped<IDispatchEventData, DispatchEventData>();
+            services.AddSingleton<ISessionService, SessionService>();
+            services.AddScoped<IHelloEventDataService, HelloEventDataService>();
+            services.AddScoped<IInvalidSessionEventDataService, InvalidSessionEventDataService>();
+            services.AddScoped<IHeartbeatAckEventDataService, HeartbeatAckEventDataService>();
+            services.AddScoped<IDispatchEventDataService, DispatchEventDataService>();
+            services.AddScoped<IUnimplementedEventDataService, UnimplementedEventDataService>();
             services.AddScoped<IEventProcessor<MessageCreate>, MessageCreateProcessor>();
 
             // DB

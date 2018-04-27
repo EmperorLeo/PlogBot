@@ -1,17 +1,16 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
 using PlogBot.Processing.Enums;
-using PlogBot.Processing.EventData;
 using PlogBot.Processing.Interfaces;
+using System.Linq;
 
 namespace PlogBot.Processing
 {
-    public class EventDataFactory : IEventDataFactory
+    public class EventDataServiceFactory : IEventDataServiceFactory
     {
         //private readonly Dictionary<GatewayOpCode, Type> _typeDict;
         private readonly IServiceScopeFactory _serviceScopeFactory;
 
-        public EventDataFactory(IServiceScopeFactory serviceScopeFactory)
+        public EventDataServiceFactory(IServiceScopeFactory serviceScopeFactory)
         {
             _serviceScopeFactory = serviceScopeFactory;
             //_typeDict = new Dictionary<GatewayOpCode, Type>
@@ -31,30 +30,30 @@ namespace PlogBot.Processing
             //};
         }
 
-        public IEventData BuildEventData(IServiceScope scope, int opcode, string data)
+        public IEventDataService BuildEventDataService(IServiceScope scope, int opcode)
         {
             var opcodeVal = (GatewayOpCode)opcode;
-            IEventData serialized = null;
+            IEventDataService eventDataService;
             switch (opcodeVal)
             {
                 case GatewayOpCode.Dispatch:
-                    var dispatchEventData = scope.ServiceProvider.GetRequiredService<IDispatchEventData>();
-                    dispatchEventData.Initialize(data);
-                    serialized = dispatchEventData;
+                    eventDataService = scope.ServiceProvider.GetRequiredService<IDispatchEventDataService>();
                     break;
                 case GatewayOpCode.Hello:
-                    serialized = JsonConvert.DeserializeObject<Hello>(data);
+                    eventDataService = scope.ServiceProvider.GetRequiredService<IHelloEventDataService>();
                     break;
                 case GatewayOpCode.HeartbeatACK:
-                    serialized = new HeartbeatAck();
+                    eventDataService = scope.ServiceProvider.GetRequiredService<IHeartbeatAckEventDataService>();
                     break;
                 case GatewayOpCode.InvalidSession:
-                    serialized = new InvalidSession();
+                    eventDataService = scope.ServiceProvider.GetRequiredService<IInvalidSessionEventDataService>();
                     break;
                 default:
+                    eventDataService = scope.ServiceProvider.GetRequiredService<IUnimplementedEventDataService>();
                     break;
             }
-            return serialized;
+
+            return eventDataService;
         }
     }
 }

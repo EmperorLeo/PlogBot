@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace PlogBot.Processing
+namespace PlogBot.Processing.EventDataServices.Models
 {
     public class Identify
     {

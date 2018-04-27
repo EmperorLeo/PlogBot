@@ -6,15 +6,13 @@ using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Threading.Tasks;
 
-namespace PlogBot.Processing.EventData
+namespace PlogBot.Processing.EventDataServices
 {
-    public class DispatchEventData : IDispatchEventData
+    public class DispatchEventDataService : IDispatchEventDataService
     {
-        public string Data { get; set; }
-
         private readonly Dictionary<string, IEventProcessor<IEvent>> _processingDict;
 
-        public DispatchEventData(
+        public DispatchEventDataService(
             IEventProcessor<MessageCreate> messageCreateProcessor
         )
         {
@@ -24,12 +22,6 @@ namespace PlogBot.Processing.EventData
             };
         }
 
-        public void Initialize(string data)
-        {
-            Console.WriteLine("Dispatch Data: " + data);
-            Data = data;
-        }
-
         public async Task RespondAsync(ClientWebSocket ws, Payload payload, string token)
         {
             if (_processingDict.ContainsKey(payload.EventName))
@@ -37,7 +29,7 @@ namespace PlogBot.Processing.EventData
                 var processor = _processingDict[payload.EventName];
                 try
                 {
-                    await processor.ProcessEvent(Data);
+                    await processor.ProcessEvent(payload.Data.ToString());
                     Console.WriteLine("Responded to Dispatch event data");
                 }
                 catch (Exception ex)

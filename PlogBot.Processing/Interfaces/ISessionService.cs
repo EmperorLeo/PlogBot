@@ -1,9 +1,11 @@
-﻿namespace PlogBot.Processing.Interfaces
-{
-    interface ISessionService
-    {
-        void SetSessionId(string sessionId);
+﻿using System;
 
-        string GetSessionId();
+namespace PlogBot.Processing.Interfaces
+{
+    public interface ISessionService
+    {
+        string SessionId { get; set; }
+        DateTime? LastHeartbeatAck { get; set; }
+        int? LastSequenceNumber { get; set; }
     }
 }

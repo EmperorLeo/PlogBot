@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace PlogBot.Processing
 {
@@ -7,7 +8,7 @@ namespace PlogBot.Processing
         [JsonProperty("op")]
         public int Opcode { get; set; }
         [JsonProperty("d")]
-        public dynamic Data { get; set; }
+        public JToken Data { get; set; }
         [JsonProperty("s")]
         public int? SequenceNumber { get; set; }
         [JsonProperty("t")]

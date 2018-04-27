@@ -39,7 +39,6 @@ namespace PlogBot.Listening
 
                 while (ws.State == WebSocketState.Open)
                 {
-                    Console.WriteLine("I'm Open! Implement me!");
                     var endOfMessage = false;
                     var sb = new StringBuilder();
                     while(!endOfMessage)

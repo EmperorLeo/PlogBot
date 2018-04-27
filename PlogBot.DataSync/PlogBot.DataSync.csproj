@@ -6,10 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="HtmlAgilityPack" Version="1.7.4" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\PlogBot.Data\PlogBot.Data.csproj" />
     <ProjectReference Include="..\PlogBot.Services\PlogBot.Services.csproj" />
   </ItemGroup>

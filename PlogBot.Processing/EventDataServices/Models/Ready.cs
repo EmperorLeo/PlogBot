@@ -4,9 +4,9 @@ using System;
 using System.Net.WebSockets;
 using System.Threading.Tasks;
 
-namespace PlogBot.Processing.EventData
+namespace PlogBot.Processing.EventDataServices.Models
 {
-    public class Ready : IEventData
+    public class Ready : IEventDataService
     {
         [JsonProperty("v")]
         public int Version { get; set; }

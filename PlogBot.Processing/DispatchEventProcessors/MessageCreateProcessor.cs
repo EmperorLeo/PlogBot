@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PlogBot.Processing.EventProcessors
+namespace PlogBot.Processing.DispatchEventProcessors
 {
     public class MessageCreateProcessor : IEventProcessor<MessageCreate>
     {

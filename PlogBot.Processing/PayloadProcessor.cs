@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using PlogBot.Configuration;
 using PlogBot.Processing.Interfaces;
+using PlogBot.Services.Interfaces;
 using System;
 using System.Net.WebSockets;
 using System.Threading.Tasks;
@@ -11,16 +12,24 @@ namespace PlogBot.Processing
 {
     public class PayloadProcessor : IPayloadProcessor
     {
-        public static int LastSequenceNumber;
-
-        private readonly IEventDataFactory _eventDataFactory;
+        private readonly IEventDataServiceFactory _eventDataServiceFactory;
+        private readonly ILoggingService _loggingService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly ISessionService _sessionService;
         private readonly string _token;
 
-        public PayloadProcessor(IEventDataFactory eventDataFactory, IServiceScopeFactory serviceScopeFactory, IOptions<AppSettings> options)
+        public PayloadProcessor(
+            IEventDataServiceFactory eventDataServiceFactory,
+            ILoggingService loggingService,
+            IServiceScopeFactory serviceScopeFactory,
+            ISessionService sessionService,
+            IOptions<AppSettings> options
+        )
         {
-            _eventDataFactory = eventDataFactory;
+            _eventDataServiceFactory = eventDataServiceFactory;
+            _loggingService = loggingService;
             _serviceScopeFactory = serviceScopeFactory;
+            _sessionService = sessionService;
             _token = options.Value.BotToken;
         }
 
@@ -29,15 +38,15 @@ namespace PlogBot.Processing
             var payload = JsonConvert.DeserializeObject<Payload>(streamData);
             if (payload.SequenceNumber.HasValue)
             {
-                LastSequenceNumber = payload.SequenceNumber.Value;
+                _sessionService.LastSequenceNumber = payload.SequenceNumber.Value;
             }
-            Console.WriteLine("Recieved opcode: " + payload.Opcode);
-            Console.WriteLine("Processed Data: " + streamData);
+            await _loggingService.LogAsync("Recieved opcode: " + payload.Opcode);
+            await _loggingService.LogAsync("Recieved data: " + payload.Data.ToString());
             // We want to create a new scope when we process a payload so we can resolve scoped services like DbContexts and DispatchData.
             using (var scope = _serviceScopeFactory.CreateScope())
             {
-                IEventData eventData = _eventDataFactory.BuildEventData(scope, payload.Opcode, JsonConvert.SerializeObject(payload.Data));
-                await eventData.RespondAsync(ws, payload, _token);
+                IEventDataService eventDataService = _eventDataServiceFactory.BuildEventDataService(scope, payload.Opcode);
+                await eventDataService.RespondAsync(ws, payload, _token);
             }
         }
     }

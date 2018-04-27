@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace PlogBot.Processing.Interfaces
 {
-    public interface IEventData
+    public interface IEventDataService
     {
         Task RespondAsync(ClientWebSocket ws, Payload payload, string token);
     }
