@@ -75,9 +75,8 @@ namespace PlogBot.Services
             var guild = htmlDocument.DocumentNode.SelectSingleNode("//li[@class=\"guild\"]")?.InnerText;
             var @class = htmlDocument.DocumentNode.SelectSingleNode("//dd[@class=\"desc\"]")?.SelectSingleNode("//li")?.InnerHtml;
             int.TryParse(htmlDocument.DocumentNode.SelectSingleNode("//dd[@class=\"desc\"]")?.SelectNodes("//li")[1].InnerText.Split(' ')[1], out var lvl);
-            var img = htmlDocument.DocumentNode.SelectSingleNode("//div[@class=\"charaterView\"]")?.SelectSingleNode("//img");
             // Yes, character view is actually spelled wrong on the website. This could potentially break if they fix it.
-            var profileImageUrl = htmlDocument.DocumentNode.SelectSingleNode("//div[@class=\"charaterView\"]")?.SelectSingleNode("//img").Attributes.AttributesWithName("src").ToList()[0].Value;
+            var profileImageUrl = htmlDocument.DocumentNode.SelectSingleNode("//div[@class='charaterView']//img")?.Attributes.AttributesWithName("src").ToList()[0].Value;
 
             if (profileImageUrl == null)
             {

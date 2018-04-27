@@ -312,7 +312,7 @@ namespace PlogBot.Processing.DispatchEventProcessors
             {
                 await _messageService.SendMessage(_event.Message.ChannelId, new OutgoingMessage
                 {
-                    Content = "Incorrect command format: !plog me [@discordusername]"
+                    Content = "Incorrect command format: !plog characters [@discordusername]"
                 });
                 return;
             }
