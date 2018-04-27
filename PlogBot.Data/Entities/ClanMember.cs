@@ -27,6 +27,9 @@ namespace PlogBot.Data.Entities
 
         public bool Active { get; set; }
 
+        // Need this saved so we don't have to look it up every time, update often.
+        public string ImageUrl { get; set; }
+
         public DateTime Created { get; set; }
 
         public DateTime? Modified { get; set; }

@@ -1,9 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using PlogBot.Services.DiscordObjects;
+using System.Threading.Tasks;
 
 namespace PlogBot.Services.Interfaces
 {
     public interface IMessageService
     {
-        Task SendMessage(ulong channelId, string content);
+        Task SendMessage(ulong channelId, OutgoingMessage message);
     }
 }
