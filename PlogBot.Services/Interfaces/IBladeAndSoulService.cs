@@ -9,6 +9,7 @@ namespace PlogBot.Services.Interfaces
     {
         Task<BladeAndSoulCharacter> GetBladeAndSoulCharacter(string name);
         Task<AbilitiesResult> GetBladeAndSoulCharacterAbilities(string name);
+        Task<BladeAndSoulItems> GetBladeAndSoulItemsAsync(string name);
         string GetClassEmojiByClass(CharacterClass @class);
     }
 }

@@ -34,18 +34,8 @@ namespace PlogBot.App
             var listener = provider.GetService<IListener>();
 
             Console.WriteLine("Waiting for events from the Ploggystyle server...");
-            try
-            {
-                listener.Listen().Wait();
-            }
-            catch(Exception e)
-            {
-                Console.WriteLine(e.StackTrace);
-            }
-            finally
-            {
-                Console.WriteLine("Done!");
-            }
+            listener.Listen().Wait();
+            Console.WriteLine("Done!");
         }
     }
 }
