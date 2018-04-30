@@ -34,7 +34,7 @@ namespace PlogBot.Services
                 { "Blade Master", CharacterClass.BladeMaster },
                 { "Blade Dancer", CharacterClass.BladeDancer },
                 { "Soul Fighter", CharacterClass.Soulfighter },
-                { "Gunner", CharacterClass.Gunner },
+                { "Gunslinger", CharacterClass.Gunner },
                 { "Kung Fu Master", CharacterClass.KungfuMaster },
                 { "Force Master", CharacterClass.ForceMaster },
                 { "Assassin", CharacterClass.Assassin },
@@ -71,6 +71,12 @@ namespace PlogBot.Services
             htmlDocument.Load(await profileHtml.Content.ReadAsStreamAsync());
 
             var accountName = htmlDocument.DocumentNode.SelectSingleNode("//dl[@class=\"signature\"]")?.SelectSingleNode("//dt")?.ChildNodes.First().InnerHtml;
+
+            if (accountName == null)
+            {
+                return null;
+            }
+
             int.TryParse(htmlDocument.DocumentNode.SelectSingleNode("//span[@class=\"masteryLv\"]")?.InnerText.Split(' ')[1], out var hmLevel);
             var guild = htmlDocument.DocumentNode.SelectSingleNode("//li[@class=\"guild\"]")?.InnerText;
             var @class = htmlDocument.DocumentNode.SelectSingleNode("//dd[@class=\"desc\"]")?.SelectSingleNode("//li")?.InnerHtml;

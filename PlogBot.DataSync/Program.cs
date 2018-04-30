@@ -1,12 +1,17 @@
-﻿using PlogBot.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using PlogBot.Data;
 using PlogBot.Data.Entities;
+using PlogBot.Data.Enums;
 using PlogBot.Services;
+using PlogBot.Services.Extensions;
 using PlogBot.Services.Interfaces;
 using PlogBot.Services.Models;
 using PlogBot.Services.WebModels;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PlogBot.DataSync
@@ -15,16 +20,18 @@ namespace PlogBot.DataSync
     {
         public static ILoggingService _loggingService;
         public static IBladeAndSoulService _bladeAndSoulService;
+        public static SemaphoreSlim _semaphoreSlim;
 
         static Program()
         {
             _loggingService = new LoggingService();
             _bladeAndSoulService = new BladeAndSoulService(_loggingService);
+            _semaphoreSlim = new SemaphoreSlim(1);
         }
 
         public static void Main(string[] args)
         {
-            SaveNewLogs().Wait();
+            DataSyncClient().Wait();
         }
 
         public async static Task DataSyncClient()
@@ -50,15 +57,18 @@ namespace PlogBot.DataSync
             using (var client = new HttpClient())
             using (var db = new PlogDbContext())
             {
+                var items = await db.Items.ToDictionaryAsync(i => i.Name, i => i);
                 client.BaseAddress = new Uri("http://na-bns.ncsoft.com");
-                var loggingProcesses = db.Plogs.Select(p => ForEachPlog(p, db)).ToList();
+                var loggingProcesses = db.Plogs.Select(p => ForEachPlog(p, db, items)).ToList();
                 await Task.WhenAll(loggingProcesses);
                 await db.SaveChangesAsync();
             }
         }
 
-        public static async Task ForEachPlog(ClanMember plog, PlogDbContext db)
+        public static async Task ForEachPlog(ClanMember plog, PlogDbContext db, Dictionary<string, Item> itemPool)
         {
+            var start = DateTime.UtcNow;
+
             var tasks = new Task[]
             {
                 _bladeAndSoulService.GetBladeAndSoulCharacter(plog.Name),
@@ -87,19 +97,21 @@ namespace PlogBot.DataSync
                 return;
             }
 
-            if (character.Clan.ToLower() != "ploggystyle")
-            {
-                plog.Active = false;
-            }
-
             var totalPower = stats.Records.TotalAbility;
 
-            db.Logs.Add(new ClanMemberStatLog
+            var powerService = new PowerService();
+            var powerScore = await powerService.CalculateScore(totalPower);
+
+            // Wait here because the dictionary of existing items is not thread safe.
+            await _semaphoreSlim.WaitAsync();
+
+            var statLog = new ClanMemberStatLog
             {
                 ClanMemberId = plog.Id,
                 Recorded = DateTime.UtcNow,
                 Level = character.Level, // No api route known, hard to parse from html
                 HongmoonLevel = character.HongmoonLevel,
+                Score = powerScore,
                 AttackPower = totalPower.AttackPower,
                 PvpAttackPower = totalPower.PvpAttackPower,
                 BossAttackPower = totalPower.BossAttackPower,
@@ -126,8 +138,60 @@ namespace PlogBot.DataSync
                 DamageReduction = totalPower.DamageReduction,
                 HealthRegen = totalPower.HealthRegen,
                 HealthRegenCombat = totalPower.HealthCombatRegen,
-                DebuffDefense = totalPower.DebuffDamageDefense
-            });
+                DebuffDefense = totalPower.DebuffDamageDefense,
+
+                Weapon = GetItem(itemPool, ItemType.Weapon, items.Weapon, items.WeaponImg),
+                Gem1 = GetItem(itemPool, ItemType.Gem, items.Gem1, items.Gem1Img),
+                Gem2 = GetItem(itemPool, ItemType.Gem, items.Gem2, items.Gem2Img),
+                Gem3 = GetItem(itemPool, ItemType.Gem, items.Gem3, items.Gem3Img),
+                Gem4 = GetItem(itemPool, ItemType.Gem, items.Gem4, items.Gem4Img),
+                Gem5 = GetItem(itemPool, ItemType.Gem, items.Gem5, items.Gem5Img),
+                Gem6 = GetItem(itemPool, ItemType.Gem, items.Gem6, items.Gem6Img),
+                Ring = GetItem(itemPool, ItemType.Ring, items.Ring, items.RingImg),
+                Earring = GetItem(itemPool, ItemType.Earring, items.Earring, items.EarringImg),
+                Necklace = GetItem(itemPool, ItemType.Necklace, items.Necklace, items.NecklaceImg),
+                Bracelet = GetItem(itemPool, ItemType.Bracelet, items.Bracelet, items.BraceletImg),
+                Belt = GetItem(itemPool, ItemType.Belt, items.Belt, items.BeltImg),
+                Gloves = GetItem(itemPool, ItemType.Gloves, items.Gloves, items.GlovesImg),
+                Soul = GetItem(itemPool, ItemType.Soul, items.Soul, items.SoulImg),
+                Heart = GetItem(itemPool, ItemType.Heart, items.Heart, items.HeartImg),
+                Pet = GetItem(itemPool, ItemType.Pet, items.Pet, items.PetImg),
+                SoulBadge = GetItem(itemPool, ItemType.SoulBadge, items.SoulBadge, items.SoulBadgeImg),
+                MysticBadge = GetItem(itemPool, ItemType.MysticBadge, items.MysticBadge, items.MysticBadgeImg)
+            };
+
+            // Done modifying items dictionary, release the lock!
+            _semaphoreSlim.Release();
+
+
+            db.Logs.Add(statLog);
+
+            var end = DateTime.UtcNow;
+            await _loggingService.LogAsync($"Processing time for {plog.Name}: {(end - start).TotalMilliseconds}");
+        }
+
+        private static Item GetItem(Dictionary<string, Item> items, ItemType type, string name, string imgUrl)
+        {
+            if (name == null)
+            {
+                return null;
+            }
+
+            if (items.ContainsKey(name))
+            {
+                return items[name];
+            }
+            else
+            {
+                var newItem = new Item
+                {
+                    Name = name,
+                    ItemType = type,
+                    ImgUrl = imgUrl
+                };
+                items.Add(name, newItem);
+                return newItem;
+            }
         }
     }
 }
