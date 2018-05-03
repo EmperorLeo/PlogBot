@@ -91,23 +91,23 @@ namespace PlogBot.Data.Entities
         [ForeignKey("PetId")]
         public Item Pet { get; set; }
 
-        public int WeaponId { get; set; }
-        public int Gem1Id { get; set; }
-        public int Gem2Id { get; set; }
-        public int Gem3Id { get; set; }
-        public int Gem4Id { get; set; }
-        public int Gem5Id { get; set; }
-        public int Gem6Id { get; set; }
-        public int RingId { get; set; }
-        public int EarringId { get; set; }
-        public int NecklaceId { get; set; }
-        public int BraceletId { get; set; }
-        public int BeltId { get; set; }
-        public int GlovesId { get; set; }
-        public int SoulId { get; set; }
-        public int HeartId { get; set; }
-        public int SoulBadgeId { get; set; }
-        public int MysticBadgeId { get; set; }
-        public int PetId { get; set; }
+        public int? WeaponId { get; set; }
+        public int? Gem1Id { get; set; }
+        public int? Gem2Id { get; set; }
+        public int? Gem3Id { get; set; }
+        public int? Gem4Id { get; set; }
+        public int? Gem5Id { get; set; }
+        public int? Gem6Id { get; set; }
+        public int? RingId { get; set; }
+        public int? EarringId { get; set; }
+        public int? NecklaceId { get; set; }
+        public int? BraceletId { get; set; }
+        public int? BeltId { get; set; }
+        public int? GlovesId { get; set; }
+        public int? SoulId { get; set; }
+        public int? HeartId { get; set; }
+        public int? SoulBadgeId { get; set; }
+        public int? MysticBadgeId { get; set; }
+        public int? PetId { get; set; }
     }
 }

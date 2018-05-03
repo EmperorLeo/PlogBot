@@ -43,7 +43,7 @@ namespace PlogBot.Processing.DispatchEventProcessors
             _userService = userService;
             _bladeAndSoulService = bladeAndSoulService;
             _loggingService = loggingService;
-            _allowedTopLevelCommands = new List<string> { "test", "add", "me", "alt", "release", "characters" };
+            _allowedTopLevelCommands = new List<string> { "test", "add", "me", "alt", "release", "characters", "whales" };
             _adminCommands = new List<string> { "reset" };
             _response = "There was an error processing this request.";
         }
@@ -96,6 +96,9 @@ namespace PlogBot.Processing.DispatchEventProcessors
                     break;
                 case "characters":
                     await ProcessCharacters(cmdArguments);
+                    break;
+                case "whales":
+                    await ProcessWhales(cmdArguments);
                     break;
                 default:
 
@@ -369,6 +372,70 @@ namespace PlogBot.Processing.DispatchEventProcessors
             await _messageService.SendMessage(_event.Message.ChannelId, new OutgoingMessage
             {
                 Content = args[0],
+                Embed = embed
+            });
+        }
+
+        private async Task ProcessWhales(List<string> args)
+        {
+            var numWhales = 5;
+            if (args.Count >= 2 || args.Count == 1 && !int.TryParse(args[0], out numWhales))
+            {
+                await _messageService.SendMessage(_event.Message.ChannelId, new OutgoingMessage
+                {
+                    Content = "Incorrect command format: !plog whales [numWhales?]"
+                });
+                return;
+            }
+
+            var topWhales = await _plogDbContext.Logs.GroupBy(x => x.ClanMemberId).Select(x => new
+            {
+                ClanMemberId = x.Key,
+                Score = x.Max(c => c.Score),
+            }).Join(_plogDbContext.Plogs, l => l.ClanMemberId, p => p.Id, (l, p) => new
+            {
+                p.Name,
+                p.Class,
+                l.Score
+            }).OrderByDescending(x => x.Score).Take(numWhales).ToListAsync();
+
+            var fields = new List<EmbedField>();
+            for (var i = 0; i < topWhales.Count; i++)
+            {
+                var whale = topWhales[i];
+                fields.Add(new EmbedField
+                {
+                    Name = $"{_bladeAndSoulService.GetClassEmojiByClass(whale.Class)} {whale.Name}",
+                    Value = $"#{i + 1} whale with a score of {whale.Score}\n\n\n\n\n"
+                });
+            }
+
+            var embed = new Embed
+            {
+                Title = "Ploggystyle Whales",
+                Timestamp = DateTime.UtcNow,
+                Color = HexConstants.Green,
+                //Thumbnail = new EmbedItem
+                //{
+                //    Url = main.ImageUrl
+                //},
+                //Author = new EmbedItem
+                //{
+                //    Name = main.RealName,
+                //    Url = $"http://na-bns.ncsoft.com/ingame/bs/character/profile?c={HttpUtility.UrlEncode(main.Name)}",
+                //    IconUrl = user.Avatar
+                //},
+                Footer = new EmbedItem
+                {
+                    IconUrl = EmojiConstants.PlogUrl,
+                    Text = "PlogBot"
+                },
+                Fields = fields
+            };
+
+            await _messageService.SendMessage(_event.Message.ChannelId, new OutgoingMessage
+            {
+                Content = "Whales",
                 Embed = embed
             });
         }

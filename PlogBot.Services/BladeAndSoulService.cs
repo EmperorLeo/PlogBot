@@ -139,11 +139,11 @@ namespace PlogBot.Services
             var weapon = weaponDiv.Attributes.FirstOrDefault(a => a.Name == "alt").Value;
             var weaponImg = weaponDiv.Attributes.FirstOrDefault(a => a.Name == "src").Value;
             var gemDivs = weaponWrapper.SelectNodes("//div[@class='enchant']//span[@class='iconGemSlot']//img");
-            var gems = gemDivs.Select(x => new
+            var gems = gemDivs?.Select(x => new
             {
                 Name = x.Attributes.FirstOrDefault(a => a.Name == "alt")?.Value,
                 Img = x.Attributes.FirstOrDefault(a => a.Name == "src")?.Value,
-            }).ToList();
+            }).ToList() ?? new List<Tuple<string, string>>().Select(x => new { Name = x.Item1, Img = x.Item2 }).ToList();
 
             // Accessories html elements
             var ringDiv = root.SelectSingleNode("//div[@class='accessoryArea']//div[@class='wrapAccessory ring']//img");

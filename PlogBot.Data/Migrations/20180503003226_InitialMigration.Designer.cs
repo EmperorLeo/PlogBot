@@ -12,8 +12,8 @@ using System;
 namespace PlogBot.Data.Migrations
 {
     [DbContext(typeof(PlogDbContext))]
-    [Migration("20180430001602_AddItemsToLog")]
-    partial class AddItemsToLog
+    [Migration("20180503003226_InitialMigration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -64,7 +64,7 @@ namespace PlogBot.Data.Migrations
 
                     b.Property<int>("BatchId");
 
-                    b.Property<int>("BeltId");
+                    b.Property<int?>("BeltId");
 
                     b.Property<int>("Block");
 
@@ -72,7 +72,7 @@ namespace PlogBot.Data.Migrations
 
                     b.Property<int>("BossDefense");
 
-                    b.Property<int>("BraceletId");
+                    b.Property<int?>("BraceletId");
 
                     b.Property<Guid>("ClanMemberId");
 
@@ -92,7 +92,7 @@ namespace PlogBot.Data.Migrations
 
                     b.Property<int>("Defense");
 
-                    b.Property<int>("EarringId");
+                    b.Property<int?>("EarringId");
 
                     b.Property<int>("EarthDamage");
 
@@ -102,19 +102,19 @@ namespace PlogBot.Data.Migrations
 
                     b.Property<int>("FrostDamage");
 
-                    b.Property<int>("Gem1Id");
+                    b.Property<int?>("Gem1Id");
 
-                    b.Property<int>("Gem2Id");
+                    b.Property<int?>("Gem2Id");
 
-                    b.Property<int>("Gem3Id");
+                    b.Property<int?>("Gem3Id");
 
-                    b.Property<int>("Gem4Id");
+                    b.Property<int?>("Gem4Id");
 
-                    b.Property<int>("Gem5Id");
+                    b.Property<int?>("Gem5Id");
 
-                    b.Property<int>("Gem6Id");
+                    b.Property<int?>("Gem6Id");
 
-                    b.Property<int>("GlovesId");
+                    b.Property<int?>("GlovesId");
 
                     b.Property<int>("Health");
 
@@ -122,7 +122,7 @@ namespace PlogBot.Data.Migrations
 
                     b.Property<int>("HealthRegenCombat");
 
-                    b.Property<int>("HeartId");
+                    b.Property<int?>("HeartId");
 
                     b.Property<int>("HongmoonLevel");
 
@@ -130,11 +130,11 @@ namespace PlogBot.Data.Migrations
 
                     b.Property<int>("LightningDamage");
 
-                    b.Property<int>("MysticBadgeId");
+                    b.Property<int?>("MysticBadgeId");
 
-                    b.Property<int>("NecklaceId");
+                    b.Property<int?>("NecklaceId");
 
-                    b.Property<int>("PetId");
+                    b.Property<int?>("PetId");
 
                     b.Property<int>("Piercing");
 
@@ -144,17 +144,17 @@ namespace PlogBot.Data.Migrations
 
                     b.Property<DateTime>("Recorded");
 
-                    b.Property<int>("RingId");
+                    b.Property<int?>("RingId");
 
                     b.Property<int>("Score");
 
                     b.Property<int>("ShadowDamage");
 
-                    b.Property<int>("SoulBadgeId");
+                    b.Property<int?>("SoulBadgeId");
 
-                    b.Property<int>("SoulId");
+                    b.Property<int?>("SoulId");
 
-                    b.Property<int>("WeaponId");
+                    b.Property<int?>("WeaponId");
 
                     b.Property<int>("WindDamage");
 
@@ -238,13 +238,11 @@ namespace PlogBot.Data.Migrations
                 {
                     b.HasOne("PlogBot.Data.Entities.Item", "Belt")
                         .WithMany()
-                        .HasForeignKey("BeltId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("BeltId");
 
                     b.HasOne("PlogBot.Data.Entities.Item", "Bracelet")
                         .WithMany()
-                        .HasForeignKey("BraceletId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("BraceletId");
 
                     b.HasOne("PlogBot.Data.Entities.ClanMember", "ClanMember")
                         .WithMany("ClanMemberStatLogs")
@@ -253,83 +251,67 @@ namespace PlogBot.Data.Migrations
 
                     b.HasOne("PlogBot.Data.Entities.Item", "Earring")
                         .WithMany()
-                        .HasForeignKey("EarringId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("EarringId");
 
                     b.HasOne("PlogBot.Data.Entities.Item", "Gem1")
                         .WithMany()
-                        .HasForeignKey("Gem1Id")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("Gem1Id");
 
                     b.HasOne("PlogBot.Data.Entities.Item", "Gem2")
                         .WithMany()
-                        .HasForeignKey("Gem2Id")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("Gem2Id");
 
                     b.HasOne("PlogBot.Data.Entities.Item", "Gem3")
                         .WithMany()
-                        .HasForeignKey("Gem3Id")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("Gem3Id");
 
                     b.HasOne("PlogBot.Data.Entities.Item", "Gem4")
                         .WithMany()
-                        .HasForeignKey("Gem4Id")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("Gem4Id");
 
                     b.HasOne("PlogBot.Data.Entities.Item", "Gem5")
                         .WithMany()
-                        .HasForeignKey("Gem5Id")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("Gem5Id");
 
                     b.HasOne("PlogBot.Data.Entities.Item", "Gem6")
                         .WithMany()
-                        .HasForeignKey("Gem6Id")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("Gem6Id");
 
                     b.HasOne("PlogBot.Data.Entities.Item", "Gloves")
                         .WithMany()
-                        .HasForeignKey("GlovesId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("GlovesId");
 
                     b.HasOne("PlogBot.Data.Entities.Item", "Heart")
                         .WithMany()
-                        .HasForeignKey("HeartId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("HeartId");
 
                     b.HasOne("PlogBot.Data.Entities.Item", "MysticBadge")
                         .WithMany()
-                        .HasForeignKey("MysticBadgeId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("MysticBadgeId");
 
                     b.HasOne("PlogBot.Data.Entities.Item", "Necklace")
                         .WithMany()
-                        .HasForeignKey("NecklaceId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("NecklaceId");
 
                     b.HasOne("PlogBot.Data.Entities.Item", "Pet")
                         .WithMany()
-                        .HasForeignKey("PetId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("PetId");
 
                     b.HasOne("PlogBot.Data.Entities.Item", "Ring")
                         .WithMany()
-                        .HasForeignKey("RingId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("RingId");
 
                     b.HasOne("PlogBot.Data.Entities.Item", "SoulBadge")
                         .WithMany()
-                        .HasForeignKey("SoulBadgeId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("SoulBadgeId");
 
                     b.HasOne("PlogBot.Data.Entities.Item", "Soul")
                         .WithMany()
-                        .HasForeignKey("SoulId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("SoulId");
 
                     b.HasOne("PlogBot.Data.Entities.Item", "Weapon")
                         .WithMany()
-                        .HasForeignKey("WeaponId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("WeaponId");
                 });
 #pragma warning restore 612, 618
         }
