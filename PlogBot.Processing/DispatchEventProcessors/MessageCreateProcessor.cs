@@ -261,6 +261,7 @@ namespace PlogBot.Processing.DispatchEventProcessors
                 if (!alt.DiscordId.HasValue)
                 {
                     alt.DiscordId = _event.Message.Author.Id;
+                    alt.Main = main;
                     await _plogDbContext.SaveChangesAsync();
                     _response = $"Attached alt character {name}";
                 }

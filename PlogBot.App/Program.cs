@@ -17,7 +17,8 @@ namespace PlogBot.App
 
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", false, true);
+                .AddJsonFile("appsettings.json", false, true)
+                .AddEnvironmentVariables();
 
             if (string.IsNullOrEmpty(env) || env.ToLower().Equals("development"))
             {

@@ -6,59 +6,59 @@ namespace PlogBot.Services.DiscordObjects
 {
     public class Embed
     {
-        [JsonProperty("title")]
+        [JsonProperty("title", NullValueHandling = NullValueHandling.Ignore)]
         public string Title { get; set; }
-        [JsonProperty("type")]
+        [JsonProperty("type", NullValueHandling = NullValueHandling.Ignore)]
         public string Type { get; set; }
-        [JsonProperty("description")]
+        [JsonProperty("description", NullValueHandling = NullValueHandling.Ignore)]
         public string Description { get; set; }
-        [JsonProperty("url")]
+        [JsonProperty("url", NullValueHandling = NullValueHandling.Ignore)]
         public string Url { get; set; }
-        [JsonProperty("timestamp")]
+        [JsonProperty("timestamp", NullValueHandling = NullValueHandling.Ignore)]
         public DateTime? Timestamp { get; set; }
-        [JsonProperty("color")]
+        [JsonProperty("color", NullValueHandling = NullValueHandling.Ignore)]
         public int? Color { get; set; }
-        [JsonProperty("footer")]
+        [JsonProperty("footer", NullValueHandling = NullValueHandling.Ignore)]
         public EmbedItem Footer { get; set; }
-        [JsonProperty("image")]
+        [JsonProperty("image", NullValueHandling = NullValueHandling.Ignore)]
         public EmbedItem Image { get; set; }
-        [JsonProperty("thumbnail")]
+        [JsonProperty("thumbnail", NullValueHandling = NullValueHandling.Ignore)]
         public EmbedItem Thumbnail { get; set; }
-        [JsonProperty("provider")]
+        [JsonProperty("provider", NullValueHandling = NullValueHandling.Ignore)]
         public EmbedItem Provider { get; set; }
-        [JsonProperty("author")]
+        [JsonProperty("author", NullValueHandling = NullValueHandling.Ignore)]
         public EmbedItem Author { get; set; }
-        [JsonProperty("fields")]
+        [JsonProperty("fields", NullValueHandling = NullValueHandling.Ignore)]
         public IEnumerable<EmbedField> Fields { get; set; }
     }
 
     public class EmbedItem
     {
-        [JsonProperty("url")]
+        [JsonProperty("url", NullValueHandling = NullValueHandling.Ignore)]
         public string Url { get; set; }
-        [JsonProperty("proxy_url")]
+        [JsonProperty("proxy_url", NullValueHandling = NullValueHandling.Ignore)]
         public string ProxyUrl { get; set; }
-        [JsonProperty("height")]
+        [JsonProperty("height", NullValueHandling = NullValueHandling.Ignore)]
         public int? Height { get; set; }
-        [JsonProperty("width")]
+        [JsonProperty("width", NullValueHandling = NullValueHandling.Ignore)]
         public int? Width { get; set; }
-        [JsonProperty("name")]
+        [JsonProperty("name", NullValueHandling = NullValueHandling.Ignore)]
         public string Name { get; set; }
-        [JsonProperty("icon_url")]
+        [JsonProperty("icon_url", NullValueHandling = NullValueHandling.Ignore)]
         public string IconUrl { get; set; }
-        [JsonProperty("proxy_icon_url")]
+        [JsonProperty("proxy_icon_url", NullValueHandling = NullValueHandling.Ignore)]
         public string ProxyIconUrl { get; set; }
-        [JsonProperty("text")]
+        [JsonProperty("text", NullValueHandling = NullValueHandling.Ignore)]
         public string Text { get; set; }
     }
 
     public class EmbedField
     {
-        [JsonProperty("name")]
+        [JsonProperty("name", NullValueHandling = NullValueHandling.Ignore)]
         public string Name { get; set; }
-        [JsonProperty("value")]
+        [JsonProperty("value", NullValueHandling = NullValueHandling.Ignore)]
         public string Value { get; set; }
-        [JsonProperty("inline")]
+        [JsonProperty("inline", NullValueHandling = NullValueHandling.Ignore)]
         public bool? Inline { get; set; }
     }
 }
