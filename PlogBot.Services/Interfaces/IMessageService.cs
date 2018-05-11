@@ -6,5 +6,7 @@ namespace PlogBot.Services.Interfaces
     public interface IMessageService
     {
         Task SendMessage(ulong channelId, OutgoingMessage message);
+
+        Task SendMessageWithAttachment(ulong channelId, OutgoingMessage message);
     }
 }

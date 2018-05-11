@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace PlogBot.Services.DiscordObjects
 {
@@ -8,5 +9,8 @@ namespace PlogBot.Services.DiscordObjects
         public string Content { get; set; }
         [JsonProperty("embed")]
         public Embed Embed { get; set; }
+        [JsonIgnore]
+        public byte[] File { get; set; }
+
     }
 }

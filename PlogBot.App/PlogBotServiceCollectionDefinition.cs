@@ -34,6 +34,7 @@ namespace PlogBot.App
             services.AddSingleton<IMessageService, MessageService>();
             services.AddSingleton<IBladeAndSoulService, BladeAndSoulService>();
             services.AddSingleton<IUserService, UserService>();
+            services.AddTransient<IClanLogService, ClanLogService>();
 
             // HttpClient Singletons
             services.AddSingleton<IDiscordApiClient, DiscordApiClient>();

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -24,6 +25,18 @@ namespace PlogBot.Services
             var client = _discordApiClient.BotAuth();
             var result = await client.PostAsync($"{DiscordApiConstants.BaseUrl}/channels/{channelId}/messages",
                 new StringContent(JsonConvert.SerializeObject(message), Encoding.UTF8, "application/json"));
+        }
+
+        public Task SendMessageWithAttachment(ulong channelId, OutgoingMessage message)
+        {
+            var client = _discordApiClient.BotAuth();
+            var content = new MultipartFormDataContent();
+
+            var fileContent = new ByteArrayContent(message.File);
+            fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("text/csv");
+
+            content.Add(fileContent, "file", "ploggystyle-clan-log.csv");
+            return client.PostAsync($"{DiscordApiConstants.BaseUrl}/channels/{channelId}/messages", content);
         }
     }
 }

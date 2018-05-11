@@ -11,6 +11,7 @@ using PlogBot.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
@@ -26,6 +27,7 @@ namespace PlogBot.Processing.DispatchEventProcessors
         private readonly PlogDbContext _plogDbContext;
         private readonly IBladeAndSoulService _bladeAndSoulService;
         private readonly ILoggingService _loggingService;
+        private readonly IClanLogService _clanLogService;
 
         private MessageCreate _event;
         private string _response;
@@ -35,7 +37,8 @@ namespace PlogBot.Processing.DispatchEventProcessors
             IUserService userService,
             PlogDbContext plogDbContext,
             IBladeAndSoulService bladeAndSoulService,
-            ILoggingService loggingService
+            ILoggingService loggingService,
+            IClanLogService clanLogService
         )
         {
             _plogDbContext = plogDbContext;
@@ -43,7 +46,8 @@ namespace PlogBot.Processing.DispatchEventProcessors
             _userService = userService;
             _bladeAndSoulService = bladeAndSoulService;
             _loggingService = loggingService;
-            _allowedTopLevelCommands = new List<string> { "test", "add", "me", "alt", "release", "characters", "whales" };
+            _clanLogService = clanLogService;
+            _allowedTopLevelCommands = new List<string> { "test", "add", "me", "alt", "release", "characters", "whales", "clanlog" };
             _adminCommands = new List<string> { "reset" };
             _response = "There was an error processing this request.";
         }
@@ -99,6 +103,9 @@ namespace PlogBot.Processing.DispatchEventProcessors
                     break;
                 case "whales":
                     await ProcessWhales(cmdArguments);
+                    break;
+                case "clanlog":
+                    await ProcessClanLog(cmdArguments);
                     break;
                 default:
 
@@ -438,6 +445,17 @@ namespace PlogBot.Processing.DispatchEventProcessors
             {
                 Content = "Whales",
                 Embed = embed
+            });
+        }
+
+        private async Task ProcessClanLog(List<string> args)
+        {
+            var csv = await _clanLogService.GetCsv(DateTime.UtcNow.AddDays(-10));
+            var dm = await _userService.OpenDm(_event.Message.Author.Id);
+            await _messageService.SendMessageWithAttachment(dm.Id, new OutgoingMessage
+            {
+                Content = "Hi! Here are the last 10 days of clan logs.",
+                File = Encoding.UTF8.GetBytes(csv)
             });
         }
     }
