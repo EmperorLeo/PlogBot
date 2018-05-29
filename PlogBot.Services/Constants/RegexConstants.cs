@@ -2,6 +2,6 @@
 {
     public class RegexConstants
     {
-        public const string MentionRegex = @"^(<@)\d+(>)$";
+        public const string MentionRegex = @"^(<@)!?\d+(>)$";
     }
 }

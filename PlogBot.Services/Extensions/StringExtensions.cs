@@ -4,7 +4,7 @@
     {
         public static ulong StripMentionExtras(this string s)
         {
-            return ulong.Parse(s.Replace("<@", "").Replace(">", ""));
+            return ulong.Parse(s.Replace("<@", "").Replace(">", "").Replace("!", ""));
         }
     }
 }
