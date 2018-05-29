@@ -28,13 +28,14 @@ namespace PlogBot.App
             // Logging
             services.AddSingleton<ILoggingService, LoggingService>();
 
-            // API Services
+            // Application Services
             services.AddSingleton<IGatewayService, GatewayService>();
             services.AddSingleton<IUtilityService, UtilityService>();
             services.AddSingleton<IMessageService, MessageService>();
             services.AddSingleton<IBladeAndSoulService, BladeAndSoulService>();
             services.AddSingleton<IUserService, UserService>();
             services.AddTransient<IClanLogService, ClanLogService>();
+            services.AddSingleton<IRaffleService, RaffleService>();
 
             // HttpClient Singletons
             services.AddSingleton<IDiscordApiClient, DiscordApiClient>();
@@ -51,7 +52,8 @@ namespace PlogBot.App
             services.AddScoped<IEventProcessor<MessageCreate>, MessageCreateProcessor>();
 
             // DB
-            var sqliteFilePath = Path.Combine(Environment.GetEnvironmentVariable(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "LocalAppData" : "Home"), @"PlogBot\plog.db");
+            var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+            var sqliteFilePath = Path.Combine(Environment.GetEnvironmentVariable(isWindows ? "LocalAppData" : "HOME"), isWindows ? @"PlogBot\plog.db" : ".plogbot/plog.db");
             services.AddDbContext<PlogDbContext>(options => options.UseSqlite(sqliteFilePath));
 
             return services;

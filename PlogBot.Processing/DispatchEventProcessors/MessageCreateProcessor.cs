@@ -6,6 +6,7 @@ using PlogBot.Processing.Events;
 using PlogBot.Processing.Interfaces;
 using PlogBot.Services.Constants;
 using PlogBot.Services.DiscordObjects;
+using PlogBot.Services.Exceptions;
 using PlogBot.Services.Extensions;
 using PlogBot.Services.Interfaces;
 using System;
@@ -28,6 +29,7 @@ namespace PlogBot.Processing.DispatchEventProcessors
         private readonly IBladeAndSoulService _bladeAndSoulService;
         private readonly ILoggingService _loggingService;
         private readonly IClanLogService _clanLogService;
+        private readonly IRaffleService _raffleService;
 
         private MessageCreate _event;
         private string _response;
@@ -38,7 +40,8 @@ namespace PlogBot.Processing.DispatchEventProcessors
             PlogDbContext plogDbContext,
             IBladeAndSoulService bladeAndSoulService,
             ILoggingService loggingService,
-            IClanLogService clanLogService
+            IClanLogService clanLogService,
+            IRaffleService raffleService
         )
         {
             _plogDbContext = plogDbContext;
@@ -47,7 +50,8 @@ namespace PlogBot.Processing.DispatchEventProcessors
             _bladeAndSoulService = bladeAndSoulService;
             _loggingService = loggingService;
             _clanLogService = clanLogService;
-            _allowedTopLevelCommands = new List<string> { "test", "add", "me", "alt", "release", "characters", "whales", "clanlog" };
+            _raffleService = raffleService;
+            _allowedTopLevelCommands = new List<string> { "test", "add", "me", "alt", "release", "characters", "whales", "clanlog", "raffle", "ticket" };
             _adminCommands = new List<string> { "reset" };
             _response = "There was an error processing this request.";
         }
@@ -107,8 +111,13 @@ namespace PlogBot.Processing.DispatchEventProcessors
                 case "clanlog":
                     await ProcessClanLog(cmdArguments);
                     break;
+                case "raffle":
+                    await ProcessRaffle(cmdArguments);
+                    break;
+                case "ticket":
+                    await ProcessTicket(cmdArguments);
+                    break;
                 default:
-
                     break;
             }
         }
@@ -319,7 +328,7 @@ namespace PlogBot.Processing.DispatchEventProcessors
 
         private async Task ProcessCharacters(List<string> args)
         {
-            if (args.Count != 1 || !Regex.IsMatch(args[0], RegexConstants.MentionRegex))
+            if (args.Count != 1 || !Regex.IsMatch(args[0], RegexConstants.MentionRegex, RegexOptions.CultureInvariant))
             {
                 await _messageService.SendMessage(_event.Message.ChannelId, new OutgoingMessage
                 {
@@ -457,6 +466,133 @@ namespace PlogBot.Processing.DispatchEventProcessors
                 Content = "Hi! Here are the last 10 days of clan logs.",
                 File = Encoding.UTF8.GetBytes(csv)
             });
+        }
+
+        private async Task ProcessRaffle(List<string> args)
+        {
+            if (args.Count == 0)
+            {
+                await _messageService.SendMessage(_event.Message.ChannelId, new OutgoingMessage
+                {
+                    Content = "Incorrect command format: !plog raffle [start/end] [maxTickets?]"
+                });
+                return;
+
+            }
+            else
+            {
+                var arg = args[0].ToLower();
+                var subArgs = args.Where((item, index) => index >= 1).ToList();
+                switch (arg)
+                {
+                    case "start":
+                        await ProcessRaffleStart(subArgs);
+                        break;
+                    case "end":
+                        await ProcessRaffleEnd(subArgs);
+                        break;
+                    case "draw":
+                        await ProcessRaffleDraw(subArgs);
+                        break;
+                    default:
+                        await _messageService.SendMessage(_event.Message.ChannelId, new OutgoingMessage
+                        {
+                            Content = "Incorrect command format: !plog raffle [start/end] [maxTickets?]"
+                        });
+                        break;
+                }
+            }
+        }
+
+        private async Task ProcessRaffleStart(List<string> args)
+        {
+            var maxTickets = 0;
+            if (args.Count >= 2 || args.Count == 1 && !int.TryParse(args[0], out maxTickets))
+            {
+                await _messageService.SendMessage(_event.Message.ChannelId, new OutgoingMessage
+                {
+                    Content = "Incorrect command format: !plog raffle [maxTickets?]"
+                });
+                return;
+            }
+            try 
+            {
+                await _raffleService.StartRaffle(maxTickets, _event.Message.ChannelId);
+                _response = "Raffle started. Type '!plog ticket' to get a ticket.";
+            }
+            catch (RaffleException ex)
+            {
+                _response = ex.Message;
+            }
+            finally
+            {
+                await _messageService.SendMessage(_event.Message.ChannelId, new OutgoingMessage
+                {
+                    Content = _response
+                });
+            }
+        }
+        
+        private async Task ProcessTicket(List<string> args)
+        {
+            var ticketGetter = _event.Message.Author.Id;
+            try
+            {
+                await _raffleService.GetTicket(ticketGetter, _event.Message.ChannelId);
+                _response = $"Successfully got <@{ticketGetter}> a ticket.";
+            }
+            catch (RaffleException ex)
+            {
+                _response = $"<@{ticketGetter}> could not get a ticket. {ex.Message}";
+            }
+            finally
+            {
+                await _messageService.SendMessage(_event.Message.ChannelId, new OutgoingMessage
+                {
+                    Content = _response
+                });
+            }
+        }
+
+        private async Task ProcessRaffleDraw(List<string> args)
+        {
+            try
+            {
+                var winner = await _raffleService.EndRaffle(_event.Message.ChannelId);
+                _response = $":tada: RNGesus blesses you, child! Congratulations <@{winner}> :confetti_ball:";
+            }
+            catch (RaffleException ex)
+            {
+                _response = ex.Message;
+            }
+            finally
+            {
+                await _messageService.SendMessage(_event.Message.ChannelId, new OutgoingMessage
+                {
+                    Content = _response
+                });
+            }
+        }
+
+        private async Task ProcessRaffleEnd(List<string> args)
+        {
+            try
+            {
+                var winner = await _raffleService.EndRaffle(_event.Message.ChannelId);
+                _response = $":tada: RNGesus blesses you, child! Congratulations <@{winner}> :confetti_ball:.";
+                _response += " The raffle is over.";
+            }
+            catch (RaffleException ex)
+            {
+                _response = ex.Message;
+            }
+            finally
+            {
+                await _messageService.SendMessage(_event.Message.ChannelId, new OutgoingMessage
+                {
+                    Content = _response
+                });
+            }
         }
     }
 }

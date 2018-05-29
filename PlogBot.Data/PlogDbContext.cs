@@ -18,7 +18,8 @@ namespace PlogBot.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            var sqliteFilePath = Path.Combine(Environment.GetEnvironmentVariable(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "LocalAppData" : "Home"), @"PlogBot\plog.db");
+            var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+            var sqliteFilePath = Path.Combine(Environment.GetEnvironmentVariable(isWindows ? "LocalAppData" : "HOME"), isWindows ? @"PlogBot\plog.db" : ".plogbot/plog.db");
             optionsBuilder.UseSqlite($"Data Source={sqliteFilePath}");
         }
 
