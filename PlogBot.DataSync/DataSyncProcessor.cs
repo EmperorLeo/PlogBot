@@ -56,7 +56,15 @@ namespace PlogBot.DataSync
             using (var db = new PlogDbContext())
             {
                 client.BaseAddress = new Uri("http://na-bns.ncsoft.com");
-                var batchNumber = await db.Logs.MaxAsync(l => l.BatchId) + 1;
+                var batchNumber = await db.Logs.MaxAsync(l => (int?)l.BatchId);
+                if (batchNumber.HasValue)
+                {
+                    batchNumber++;
+                }
+                else
+                {
+                    batchNumber = 1;    
+                }
                 var loggingProcesses = db.Plogs.Select(p => ForEachPlog_GetInformation(p)).ToList();
                 await Task.WhenAll(loggingProcesses);
 
@@ -82,7 +90,7 @@ namespace PlogBot.DataSync
                     loggingProcesses.Select(lp => lp.Result?.Items)
                         .Where(i => i != null)
                         .ToList(), db);
-                var saves = loggingProcesses.Select(lp => ForEachPlog_Add(lp.Result, db, items, batchNumber));
+                var saves = loggingProcesses.Select(lp => ForEachPlog_Add(lp.Result, db, items, batchNumber.Value));
                 await Task.WhenAll(saves);
 
                 try
