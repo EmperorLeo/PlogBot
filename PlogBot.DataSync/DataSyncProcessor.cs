@@ -127,7 +127,7 @@ namespace PlogBot.DataSync
                 return null;
             }
 
-            var isInClan = character.Clan.Equals("Ploggystyle", StringComparison.OrdinalIgnoreCase);
+            var isInClan = "Ploggystyle".Equals(character.Clan, StringComparison.OrdinalIgnoreCase);
             if (!isInClan && plog.Active)
             {
                 await _webhookService.ExecuteInactivePlogWebhook($"{plog.Name} ({plog.RealName})");
