@@ -559,7 +559,14 @@ namespace PlogBot.Processing.DispatchEventProcessors
             try
             {
                 var winner = await _raffleService.EndRaffle(_event.Message.ChannelId);
-                _response = $":tada: RNGesus blesses you, child! Congratulations <@{winner}> :confetti_ball:";
+                if (winner != 0)
+                {
+                    _response = $":tada: RNGesus blesses you, child! Congratulations <@{winner}> :confetti_ball:";
+                }
+                else
+                {
+                    _response = $"There are no more participants.";
+                }
             }
             catch (RaffleException ex)
             {
@@ -579,8 +586,11 @@ namespace PlogBot.Processing.DispatchEventProcessors
             try
             {
                 var winner = await _raffleService.EndRaffle(_event.Message.ChannelId);
-                _response = $":tada: RNGesus blesses you, child! Congratulations <@{winner}> :confetti_ball:.";
-                _response += " The raffle is over.";
+                if (winner != 0)
+                {
+                    _response = $":tada: RNGesus blesses you, child! Congratulations <@{winner}> :confetti_ball:. ";
+                }
+                _response += "The raffle is over.";
             }
             catch (RaffleException ex)
             {
