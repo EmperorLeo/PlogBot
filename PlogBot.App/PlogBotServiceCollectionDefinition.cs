@@ -36,6 +36,7 @@ namespace PlogBot.App
             services.AddSingleton<IUserService, UserService>();
             services.AddTransient<IClanLogService, ClanLogService>();
             services.AddSingleton<IRaffleService, RaffleService>();
+            services.AddTransient<IAlertService, AlertService>();
 
             // HttpClient Singletons
             services.AddSingleton<IDiscordApiClient, DiscordApiClient>();

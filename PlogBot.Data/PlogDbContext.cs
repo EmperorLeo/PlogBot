@@ -11,6 +11,7 @@ namespace PlogBot.Data
         public DbSet<ClanMember> Plogs { get; set; }
         public DbSet<ClanMemberStatLog> Logs { get; set; }
         public DbSet<Item> Items { get; set; }
+        public DbSet<Alert> Alerts { get; set; }
 
         public PlogDbContext() { }
 
@@ -30,6 +31,7 @@ namespace PlogBot.Data
             builder.Entity<ClanMemberStatLog>().HasIndex(l => l.Score);
             builder.Entity<Item>().HasIndex(i => i.ItemType);
             builder.Entity<Item>().HasIndex(i => i.Name);
+            builder.Entity<Alert>().HasIndex(a => a.Name);
         }
     }
 }

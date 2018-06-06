@@ -30,6 +30,7 @@ namespace PlogBot.Processing.DispatchEventProcessors
         private readonly ILoggingService _loggingService;
         private readonly IClanLogService _clanLogService;
         private readonly IRaffleService _raffleService;
+        private readonly IAlertService _alertService;
 
         private MessageCreate _event;
         private string _response;
@@ -41,7 +42,8 @@ namespace PlogBot.Processing.DispatchEventProcessors
             IBladeAndSoulService bladeAndSoulService,
             ILoggingService loggingService,
             IClanLogService clanLogService,
-            IRaffleService raffleService
+            IRaffleService raffleService,
+            IAlertService alertService
         )
         {
             _plogDbContext = plogDbContext;
@@ -51,7 +53,8 @@ namespace PlogBot.Processing.DispatchEventProcessors
             _loggingService = loggingService;
             _clanLogService = clanLogService;
             _raffleService = raffleService;
-            _allowedTopLevelCommands = new List<string> { "test", "add", "me", "alt", "release", "characters", "whales", "clanlog", "raffle", "ticket" };
+            _alertService = alertService;
+            _allowedTopLevelCommands = new List<string> { "test", "add", "me", "alt", "release", "characters", "whales", "clanlog", "raffle", "ticket", "alert" };
             _adminCommands = new List<string> { "reset" };
             _response = "There was an error processing this request.";
         }
@@ -116,6 +119,9 @@ namespace PlogBot.Processing.DispatchEventProcessors
                     break;
                 case "ticket":
                     await ProcessTicket(cmdArguments);
+                    break;
+                case "alert":
+                    await ProcessAlert(cmdArguments);
                     break;
                 default:
                     break;
@@ -603,6 +609,101 @@ namespace PlogBot.Processing.DispatchEventProcessors
                     Content = _response
                 });
             }
+        }
+
+        private async Task ProcessAlert(List<string> args)
+        {
+            var topLevelAlertArgs = new [] { "create", "edit", "delete" };
+            if (args.Count == 0 || !topLevelAlertArgs.Contains(args[0].ToLower()))
+            {
+                await SendAlertCommandEmbed();
+                return;
+            }
+
+            args = args.Where((item, index) => index > 0).ToList();
+            switch (args[0].ToLower())
+            {
+                case "create":
+                    await ProcessAlertCreate(args);
+                    break;
+                case "edit":
+                    await ProcessAlertEdit(args);
+                    break;
+                default:
+                    await ProcessAlertDelete(args);
+                    break;
+            }
+        }
+
+        private async Task ProcessAlertCreate(List<string> args)
+        {
+            if (args.Count < 3)
+            {
+                await SendAlertCommandEmbed();
+                return;
+            }
+            var weekdays = new [] { "sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday" };
+            var title = args[0];
+            var text = args[1];
+            int? day = null;
+            var time = 0;
+            var rolesStartingArg = 3;
+            if (weekdays.Contains(args[2].ToLower()))
+            {
+                day = weekdays.ToList().IndexOf(args[2].ToLower());
+                rolesStartingArg = 4;
+                if (args.Count < 4)
+                {
+                    // Specified a week but no time.
+                    await SendAlertCommandEmbed();
+                    return;
+                }
+                var stringTime = args[3];
+                if (!Regex.IsMatch(stringTime, RegexConstants.TimeRegex))
+                {
+                    await SendAlertCommandEmbed();
+                    return;
+                }
+                time = stringTime.ParseTime();
+            }
+            else
+            {
+                var stringTime = args[2];
+                if (!Regex.IsMatch(stringTime, RegexConstants.TimeRegex))
+                {
+                    await SendAlertCommandEmbed();
+                    return;
+                }
+                time = stringTime.ParseTime();
+            }
+            var roles = args
+                .Where((item, index) => index >= rolesStartingArg && Regex.IsMatch(item, RegexConstants.MentionRegex))
+                .Select(x => x.StripMentionExtras()).ToList();
+            await _alertService.CreateAlert(title, time, day, text, roles, _event.Message.ChannelId);
+        }
+
+        private async Task ProcessAlertEdit(List<string> args)
+        {
+            if (args.Count < 3)
+            {
+                await SendAlertCommandEmbed();
+                return;
+            }
+            await _alertService.ModifyAlert("", 0, 0, "", null, 0);
+        }
+
+        private async Task ProcessAlertDelete(List<string> args)
+        {
+            await _alertService.RetireAlert("");
+        }
+
+        private Task SendAlertCommandEmbed()
+        {
+            return _messageService.SendMessage(_event.Message.ChannelId, new OutgoingMessage
+            {
+                Content = "Alert Command",
+                Embed = _alertService.GetAlertEmbed()
+            });
         }
     }
 }
