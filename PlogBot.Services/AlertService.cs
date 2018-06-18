@@ -1,40 +1,124 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using PlogBot.Data;
+using PlogBot.Data.Entities;
+using PlogBot.Services.Constants;
 using PlogBot.Services.DiscordObjects;
+using PlogBot.Services.Extensions;
 using PlogBot.Services.Interfaces;
 
 namespace PlogBot.Services
 {
     public class AlertService : IAlertService
     {
-        public Task BlastAlert(string name, string tect, List<ulong> roles, ulong channel)
+        private readonly IMessageService _messageService;
+        private readonly ITimeZoneService _timeZoneService;
+        private readonly PlogDbContext _plogDbContext;
+
+        public AlertService(PlogDbContext plogDbContext, IMessageService messageService, ITimeZoneService timeZoneService)
         {
-            throw new System.NotImplementedException();
+            _plogDbContext = plogDbContext;
+            _messageService = messageService;
+            _timeZoneService = timeZoneService;
         }
 
-        public Task CreateAlert(string name, int time, int? day, string text, List<ulong> roles, ulong channel)
+        public Task BlastAlert(string name, string text, List<ulong> roles, ulong channel)
         {
-            throw new System.NotImplementedException();
+            var message = new OutgoingMessage
+            {
+                Content = $"Calling all ",
+                Embed = new Embed
+                {
+                    Title = name,
+                    Description = text,
+                    Timestamp = DateTime.UtcNow,
+                    Color = HexConstants.Green
+                }
+            };
+            roles.ForEach(r => message.Content += ($"<@&{r}> "));
+            message.Content += "!";
+            return _messageService.SendMessage(channel, message);
+        }
+
+        public async Task CreateAlert(string name, int time, int? day, string text, List<ulong> roles, ulong channel, ulong user)
+        {
+            var timeInfo = await _timeZoneService.GetTime(user, day, time);
+            var alert = new Alert 
+            {
+                Name = name,
+                Description = text,
+                Roles = roles.ConcatenateULongs(),
+                Time = timeInfo.Item2,
+                Day = timeInfo.Item1,
+                ChannelId = channel,
+                DiscordUserId = user
+            };
+            _plogDbContext.Add(alert);
+            await _plogDbContext.SaveChangesAsync();
         }
 
         public Embed GetAlertEmbed()
         {
-            throw new System.NotImplementedException();
+            return new Embed
+            {
+                Title = "Alert Help Menu",
+                Description = "The following commands can be used to set reoccurring events either daily or weekly.",
+                Fields = new List<EmbedField>
+                {
+                    new EmbedField
+                    {
+                        Name = "Create an alert",
+                        Value = "!plog alert create [name] [description] [dayofweek?] [time] [roles...]"
+                    },
+                    new EmbedField
+                    {
+                        Name = "Modify an existing alert",
+                        Value = "!plog alert modify [name] [description] [dayofweek?] [time] [roles...]"
+                    },
+                    new EmbedField
+                    {
+                        Name = "Delete an existing alert",
+                        Value = "!plog alert delete [name]"
+                    }
+                }
+            };
         }
 
-        public Task GetReadyAlerts()
+        public async Task<List<Alert>> GetReadyAlerts()
         {
-            throw new System.NotImplementedException();
+            var curDate = DateTime.UtcNow;
+            var curWeek = (int)curDate.DayOfWeek;
+            var totalDayTime =  curDate.Minute + curDate.Hour * 60;
+            var readyAlerts = await _plogDbContext.Alerts
+                .Where(x => !x.LastProcessed.HasValue || (curDate - x.LastProcessed.Value).TotalMinutes >= 15)
+                .Where(x => !x.Day.HasValue || (x.Day == curWeek && (x.Time - totalDayTime <= 60 && x.Time - totalDayTime >= -14) || (curWeek - x.Day == 1 || curWeek == 6 && x.Day == 0) && (1440 - totalDayTime + x.Time <= 60 && 1440 - totalDayTime + x.Time >= -14)))
+                .Where(x => x.Day.HasValue || (x.Time - totalDayTime <= 60 && x.Time - totalDayTime >= -14) || (1440 - totalDayTime + x.Time <= 60 && 1440 - totalDayTime + x.Time >= -14))
+                .ToListAsync();
+
+            return readyAlerts;
         }
 
-        public Task ModifyAlert(string name, int time, int? day, string text, List<ulong> roles, ulong channel)
+        public async Task ModifyAlert(string name, int time, int? day, string text, List<ulong> roles, ulong channel)
         {
-            throw new System.NotImplementedException();
+            var alert = await _plogDbContext.Alerts.Where(x => x.Name == name).FirstOrDefaultAsync();
+            var timeInfo = await _timeZoneService.GetTime(alert.DiscordUserId, day, time);
+            alert.Time = timeInfo.Item2;
+            alert.Day = timeInfo.Item1;
+            alert.Description = text;
+            alert.Roles = roles.ConcatenateULongs();
+            alert.ChannelId = channel;
+            _plogDbContext.Update(alert);
+            await _plogDbContext.SaveChangesAsync();
         }
 
-        public Task RetireAlert(string name)
+        public async Task RetireAlert(string name)
         {
-            throw new System.NotImplementedException();
+            var alert = await _plogDbContext.Alerts.Where(x => x.Name == name).FirstOrDefaultAsync();
+            _plogDbContext.Remove(alert);
+            await _plogDbContext.SaveChangesAsync();
         }
     }
 }

@@ -8,5 +8,7 @@ namespace PlogBot.Services.Interfaces
         Task SendMessage(ulong channelId, OutgoingMessage message);
 
         Task SendMessageWithAttachment(ulong channelId, OutgoingMessage message);
+        
+        Task DeleteMessageAsync(ulong channelId, ulong messageId);
     }
 }

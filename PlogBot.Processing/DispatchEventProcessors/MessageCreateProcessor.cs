@@ -25,12 +25,14 @@ namespace PlogBot.Processing.DispatchEventProcessors
         private readonly IUserService _userService;
         private readonly IList<string> _allowedTopLevelCommands;
         private readonly IList<string> _adminCommands;
+        private readonly IList<string> _bannedKashPhrases;
         private readonly PlogDbContext _plogDbContext;
         private readonly IBladeAndSoulService _bladeAndSoulService;
         private readonly ILoggingService _loggingService;
         private readonly IClanLogService _clanLogService;
         private readonly IRaffleService _raffleService;
         private readonly IAlertService _alertService;
+        private readonly ITimeZoneService _timeZoneService;
 
         private MessageCreate _event;
         private string _response;
@@ -43,7 +45,8 @@ namespace PlogBot.Processing.DispatchEventProcessors
             ILoggingService loggingService,
             IClanLogService clanLogService,
             IRaffleService raffleService,
-            IAlertService alertService
+            IAlertService alertService,
+            ITimeZoneService timeZoneService
         )
         {
             _plogDbContext = plogDbContext;
@@ -54,8 +57,10 @@ namespace PlogBot.Processing.DispatchEventProcessors
             _clanLogService = clanLogService;
             _raffleService = raffleService;
             _alertService = alertService;
-            _allowedTopLevelCommands = new List<string> { "test", "add", "me", "alt", "release", "characters", "whales", "clanlog", "raffle", "ticket", "alert" };
+            _timeZoneService = timeZoneService;
+            _allowedTopLevelCommands = new List<string> { "test", "add", "me", "alt", "release", "characters", "whales", "clanlog", "raffle", "ticket", "alert", "mytime" };
             _adminCommands = new List<string> { "reset" };
+            _bannedKashPhrases = new List<string> { "no", "nope", "nah", "nada", "n0", "n0pe" };
             _response = "There was an error processing this request.";
         }
 
@@ -78,6 +83,10 @@ namespace PlogBot.Processing.DispatchEventProcessors
                 {
                     await ProcessEventInternal(commandArgs);
                 }
+            }
+            else if (_event.Message.Author.Id == DiscordUserConstants.LeoId && _bannedKashPhrases.Contains(Regex.Replace(_event.Message.Content, "\\.?\\??\\!?", "").Trim().ToLower()))
+            {
+                await _messageService.DeleteMessageAsync(_event.Message.ChannelId, _event.Message.Id);
             }
         }
 
@@ -123,6 +132,9 @@ namespace PlogBot.Processing.DispatchEventProcessors
                 case "alert":
                     await ProcessAlert(cmdArguments);
                     break;
+                case "mytime":
+                    await ProcessMyTime(cmdArguments);
+                    break;
                 default:
                     break;
             }
@@ -130,9 +142,12 @@ namespace PlogBot.Processing.DispatchEventProcessors
 
         private Task ProcessTest()
         {
+            var timeZones = TimeZoneInfo.GetSystemTimeZones();
+            var message = "";
+            timeZones.ToList().ForEach(x => message += $"DN: {x.DisplayName} ID: {x.Id} \n");
             return _messageService.SendMessage(_event.Message.ChannelId, new OutgoingMessage
             {
-                Content = "Successful Command"
+                Content = message
             });
         }
 
@@ -620,8 +635,18 @@ namespace PlogBot.Processing.DispatchEventProcessors
                 return;
             }
 
+            if (!await _timeZoneService.HasTimeZoneSet(_event.Message.Author.Id))
+            {
+                await _messageService.SendMessage(_event.Message.ChannelId, new OutgoingMessage
+                {
+                    Content = "Please set your time zone first with: !plog mytime [timeZone]"
+                });
+                return;
+            }
+
+            var method = args[0].ToLower();
             args = args.Where((item, index) => index > 0).ToList();
-            switch (args[0].ToLower())
+            switch (method)
             {
                 case "create":
                     await ProcessAlertCreate(args);
@@ -636,6 +661,54 @@ namespace PlogBot.Processing.DispatchEventProcessors
         }
 
         private async Task ProcessAlertCreate(List<string> args)
+        {
+            // TODO: Refactor all this logic into some kind of shared method with process alert edit
+            if (args.Count < 3)
+            {
+                await SendAlertCommandEmbed();
+                return;
+            }
+            var weekdays = new [] { "sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday" };
+            var title = args[0];
+            var text = args[1];
+            int? day = null;
+            var time = 0;
+            var rolesStartingArg = 3;
+            if (weekdays.Contains(args[2].ToLower()))
+            {
+                day = weekdays.ToList().IndexOf(args[2].ToLower());
+                rolesStartingArg = 4;
+                if (args.Count < 4)
+                {
+                    // Specified a week but no time.
+                    await SendAlertCommandEmbed();
+                    return;
+                }
+                var stringTime = args[3];
+                if (!Regex.IsMatch(stringTime, RegexConstants.TimeRegex))
+                {
+                    await SendAlertCommandEmbed();
+                    return;
+                }
+                time = stringTime.ParseTime();
+            }
+            else
+            {
+                var stringTime = args[2];
+                if (!Regex.IsMatch(stringTime, RegexConstants.TimeRegex))
+                {
+                    await SendAlertCommandEmbed();
+                    return;
+                }
+                time = stringTime.ParseTime();
+            }
+            var roles = args
+                .Where((item, index) => index >= rolesStartingArg && Regex.IsMatch(item, RegexConstants.MentionRegex))
+                .Select(x => x.StripMentionExtras()).ToList();
+            await _alertService.CreateAlert(title, time, day, text, roles, _event.Message.ChannelId, _event.Message.Author.Id);
+        }
+
+        private async Task ProcessAlertEdit(List<string> args)
         {
             if (args.Count < 3)
             {
@@ -679,22 +752,18 @@ namespace PlogBot.Processing.DispatchEventProcessors
             var roles = args
                 .Where((item, index) => index >= rolesStartingArg && Regex.IsMatch(item, RegexConstants.MentionRegex))
                 .Select(x => x.StripMentionExtras()).ToList();
-            await _alertService.CreateAlert(title, time, day, text, roles, _event.Message.ChannelId);
-        }
-
-        private async Task ProcessAlertEdit(List<string> args)
-        {
-            if (args.Count < 3)
-            {
-                await SendAlertCommandEmbed();
-                return;
-            }
-            await _alertService.ModifyAlert("", 0, 0, "", null, 0);
+            await _alertService.ModifyAlert(title, time, day, text, roles, _event.Message.ChannelId);
         }
 
         private async Task ProcessAlertDelete(List<string> args)
         {
-            await _alertService.RetireAlert("");
+            if (args.Count != 1)
+            {
+                await SendAlertCommandEmbed();
+                return;
+            }
+            
+            await _alertService.RetireAlert(args[0]);
         }
 
         private Task SendAlertCommandEmbed()
@@ -703,6 +772,33 @@ namespace PlogBot.Processing.DispatchEventProcessors
             {
                 Content = "Alert Command",
                 Embed = _alertService.GetAlertEmbed()
+            });
+        }
+
+        private async Task ProcessMyTime(List<string> args)
+        {
+            if (args.Count != 1)
+            {
+                await _messageService.SendMessage(_event.Message.ChannelId, new OutgoingMessage
+                {
+                    Content = "Incorrect command format: !plog mytime [timezone]"
+                });
+                return;
+            }
+            var timeZone = args[0];
+            if (!_timeZoneService.IsValid(timeZone))
+            {
+                await _messageService.SendMessage(_event.Message.ChannelId, new OutgoingMessage
+                {
+                    Content = $"Time Zone \"{timeZone}\" is not valid. Examples: EST, EDT, CST, CDT, PST, PDT"
+                });
+                return;
+            }
+
+            await _timeZoneService.SaveTimeZonePreference(timeZone, _event.Message.Author.Id);
+            await _messageService.SendMessage(_event.Message.ChannelId, new OutgoingMessage
+            {
+                Content = $"Your time zone has been set to \"{timeZone}\"."
             });
         }
     }

@@ -71,21 +71,6 @@ namespace PlogBot.DataSync
                 // Filter out unprocessable entities
                 loggingProcesses = loggingProcesses.Where(lp => lp.Result != null).ToList();
 
-                // TEST CODE FOR LEAVING THE CLAN
-                //if (!loggingProcesses.Any(p => p.Result.Plog.Name == "Nihil Saiona"))
-                //{
-                //    db.Plogs.Add(new ClanMember
-                //    {
-                //        Name = "Nihil Saiona",
-                //        RealName = "ScionOfTheVoid",
-                //        Class = CharacterClass.ForceMaster,
-                //        Created = DateTime.UtcNow,
-                //        Active = true,
-                //        ImageUrl = "randomimgurl"
-                //    });
-                //    await db.SaveChangesAsync();
-                //}
-
                 var items = await ProcessItems(
                     loggingProcesses.Select(lp => lp.Result?.Items)
                         .Where(i => i != null)

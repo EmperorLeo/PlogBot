@@ -20,10 +20,16 @@ namespace PlogBot.Services
             _discordApiClient = discordApiClient;
         }
 
-        public async Task SendMessage(ulong channelId, OutgoingMessage message)
+        public Task DeleteMessageAsync(ulong channelId, ulong messageId)
         {
             var client = _discordApiClient.BotAuth();
-            var result = await client.PostAsync($"{DiscordApiConstants.BaseUrl}/channels/{channelId}/messages",
+            return client.DeleteAsync($"{DiscordApiConstants.BaseUrl}/channels/{channelId}/messages/{messageId}");
+        }
+
+        public Task SendMessage(ulong channelId, OutgoingMessage message)
+        {
+            var client = _discordApiClient.BotAuth();
+            return client.PostAsync($"{DiscordApiConstants.BaseUrl}/channels/{channelId}/messages",
                 new StringContent(JsonConvert.SerializeObject(message), Encoding.UTF8, "application/json"));
         }
 

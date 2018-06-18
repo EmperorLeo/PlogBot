@@ -12,6 +12,7 @@ namespace PlogBot.Data
         public DbSet<ClanMemberStatLog> Logs { get; set; }
         public DbSet<Item> Items { get; set; }
         public DbSet<Alert> Alerts { get; set; }
+        public DbSet<TimeZonePreference> Times { get; set; }
 
         public PlogDbContext() { }
 
@@ -32,6 +33,7 @@ namespace PlogBot.Data
             builder.Entity<Item>().HasIndex(i => i.ItemType);
             builder.Entity<Item>().HasIndex(i => i.Name);
             builder.Entity<Alert>().HasIndex(a => a.Name);
+            builder.Entity<TimeZonePreference>().HasIndex(t => t.DiscordUserId).IsUnique();
         }
     }
 }

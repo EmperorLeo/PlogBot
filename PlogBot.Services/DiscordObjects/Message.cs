@@ -25,7 +25,7 @@ namespace PlogBot.Services.DiscordObjects
         [JsonProperty("mentions")]
         public IEnumerable<User> Mentions { get; set; }
         [JsonProperty("mention_roles")]
-        public IEnumerable<Role> MentionRoles { get; set; }
+        public IEnumerable<ulong> MentionRoles { get; set; }
         [JsonProperty("attachments")]
         public IEnumerable<Attachment> Attachments { get; set; }
         [JsonProperty("embeds")]

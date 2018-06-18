@@ -13,12 +13,14 @@ namespace PlogBot.Processing.EventDataServices
         private readonly Dictionary<string, IEventProcessor<IEvent>> _processingDict;
 
         public DispatchEventDataService(
-            IEventProcessor<MessageCreate> messageCreateProcessor
+            IEventProcessor<MessageCreate> messageCreateProcessor,
+            IEventProcessor<TypingStarted> typingStartedProcessor
         )
         {
             _processingDict = new Dictionary<string, IEventProcessor<IEvent>>
             {
-                { EventTypes.MESSAGE_CREATE.ToString(), messageCreateProcessor }
+                { EventTypes.MESSAGE_CREATE.ToString(), messageCreateProcessor },
+                { EventTypes.TYPING_START.ToString(), typingStartedProcessor }
             };
         }
 

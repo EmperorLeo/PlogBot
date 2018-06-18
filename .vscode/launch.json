@@ -5,6 +5,18 @@
    "version": "0.2.0",
    "configurations": [
         {
+            "name": ".NET Core Launch (console) - Alerts",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/PlogBot.Alerts/bin/Debug/netcoreapp2.1/PlogBot.Alerts.dll",
+            "args": [],
+            "cwd": "${workspaceRoot}/PlogBot.Alerts",
+            "stopAtEntry": false,
+            "console": "internalConsole",
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
             "name": ".NET Core Launch (console) - Discord Bot",
             "type": "coreclr",
             "request": "launch",

@@ -10,9 +10,10 @@ using PlogBot.Data;
 namespace PlogBot.Data.Migrations
 {
     [DbContext(typeof(PlogDbContext))]
-    partial class PlogDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180609042339_AddingAlerts")]
+    partial class AddingAlerts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -250,25 +251,6 @@ namespace PlogBot.Data.Migrations
                     b.HasIndex("Name");
 
                     b.ToTable("Items");
-                });
-
-            modelBuilder.Entity("PlogBot.Data.Entities.TimeZonePreference", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<ulong>("DiscordUserId");
-
-                    b.Property<bool>("HasDaylightSavings");
-
-                    b.Property<string>("TimeZone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DiscordUserId")
-                        .IsUnique();
-
-                    b.ToTable("Times");
                 });
 
             modelBuilder.Entity("PlogBot.Data.Entities.ClanMember", b =>
