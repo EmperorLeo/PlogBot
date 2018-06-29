@@ -25,7 +25,7 @@ namespace PlogBot.Alerts
         public async Task Process()
         {
             var alerts = await _alertService.GetReadyAlerts();
-            var tasks = alerts.Select(a => _alertService.BlastAlert(a.Name, a.Description, a.Roles.GetULongs(), a.ChannelId));
+            var tasks = alerts.Select(a => _alertService.BlastAlert(a.Name, a.Description, a.Time, a.Roles.GetULongs(), a.ChannelId));
             await Task.WhenAll(tasks);
             var processedTime = DateTime.UtcNow;
             alerts.ForEach(a => a.LastProcessed = processedTime);

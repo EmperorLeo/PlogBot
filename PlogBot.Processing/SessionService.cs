@@ -8,5 +8,6 @@ namespace PlogBot.Processing
         public string SessionId { get; set; }
         public DateTime? LastHeartbeatAck { get; set; }
         public int? LastSequenceNumber { get; set; }
+        public bool Reconnect { get; set; }
     }
 }

@@ -5,6 +5,5 @@ namespace PlogBot.Listening.Interfaces
     public interface IListener
     {
         Task Listen();
-        Task ListenInternal();
     }
 }

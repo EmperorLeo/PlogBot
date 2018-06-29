@@ -33,6 +33,8 @@ namespace PlogBot.Processing.DispatchEventProcessors
         private readonly IRaffleService _raffleService;
         private readonly IAlertService _alertService;
         private readonly ITimeZoneService _timeZoneService;
+        private readonly IPowerService _powerService;
+        private readonly IGuildService _guildService;
 
         private MessageCreate _event;
         private string _response;
@@ -46,7 +48,9 @@ namespace PlogBot.Processing.DispatchEventProcessors
             IClanLogService clanLogService,
             IRaffleService raffleService,
             IAlertService alertService,
-            ITimeZoneService timeZoneService
+            ITimeZoneService timeZoneService,
+            IPowerService powerService,
+            IGuildService guildService
         )
         {
             _plogDbContext = plogDbContext;
@@ -58,6 +62,8 @@ namespace PlogBot.Processing.DispatchEventProcessors
             _raffleService = raffleService;
             _alertService = alertService;
             _timeZoneService = timeZoneService;
+            _powerService = powerService;
+            _guildService = guildService;
             _allowedTopLevelCommands = new List<string> { "test", "add", "me", "alt", "release", "characters", "whales", "clanlog", "raffle", "ticket", "alert", "mytime" };
             _adminCommands = new List<string> { "reset" };
             _bannedKashPhrases = new List<string> { "no", "nope", "nah", "nada", "n0", "n0pe" };
@@ -84,7 +90,7 @@ namespace PlogBot.Processing.DispatchEventProcessors
                     await ProcessEventInternal(commandArgs);
                 }
             }
-            else if (_event.Message.Author.Id == DiscordUserConstants.LeoId && _bannedKashPhrases.Contains(Regex.Replace(_event.Message.Content, "\\.?\\??\\!?", "").Trim().ToLower()))
+            else if (_event.Message.Author.Id == DiscordUserConstants.KashId && _bannedKashPhrases.Contains(Regex.Replace(_event.Message.Content, "\\.?\\??\\!?", "").Trim().ToLower()))
             {
                 await _messageService.DeleteMessageAsync(_event.Message.ChannelId, _event.Message.Id);
             }
@@ -360,6 +366,7 @@ namespace PlogBot.Processing.DispatchEventProcessors
 
             var mentionId = args[0].StripMentionExtras();
             var characters = await _plogDbContext.Plogs.Where(p => p.DiscordId == mentionId).OrderBy(u => u.MainId).ToListAsync();
+            var powers = (await _powerService.GetWhaleScoresForUser(mentionId)).ToDictionary(x => x.Name, x => x);
 
             if (characters.Count == 0)
             {
@@ -375,10 +382,15 @@ namespace PlogBot.Processing.DispatchEventProcessors
             var fields = new List<EmbedField>();
             characters.ForEach(c =>
             {
+                var power = "Whale Score: 0";
+                if (powers.ContainsKey(c.Name))
+                {
+                    power = $"Whale Score: {powers[c.Name].Score}";
+                }
                 fields.Add(new EmbedField
                 {
                     Name = $"{_bladeAndSoulService.GetClassEmojiByClass(c.Class)} {c.Name}",
-                    Value = "TODO: Power level summary here."
+                    Value = power
                 });
             });
 
@@ -426,16 +438,7 @@ namespace PlogBot.Processing.DispatchEventProcessors
                 return;
             }
 
-            var topWhales = await _plogDbContext.Logs.GroupBy(x => x.ClanMemberId).Select(x => new
-            {
-                ClanMemberId = x.Key,
-                Score = x.Max(c => c.Score),
-            }).Join(_plogDbContext.Plogs, l => l.ClanMemberId, p => p.Id, (l, p) => new
-            {
-                p.Name,
-                p.Class,
-                l.Score
-            }).OrderByDescending(x => x.Score).Take(numWhales).ToListAsync();
+            var topWhales = await _powerService.GetWhales(numWhales);
 
             var fields = new List<EmbedField>();
             for (var i = 0; i < topWhales.Count; i++)
@@ -443,7 +446,7 @@ namespace PlogBot.Processing.DispatchEventProcessors
                 var whale = topWhales[i];
                 fields.Add(new EmbedField
                 {
-                    Name = $"{_bladeAndSoulService.GetClassEmojiByClass(whale.Class)} {whale.Name}",
+                    Name = $"{_bladeAndSoulService.GetClassEmojiByClass(whale.CharacterClass)} {whale.Name}",
                     Value = $"#{i + 1} whale with a score of {whale.Score}\n\n\n\n\n"
                 });
             }
@@ -706,6 +709,7 @@ namespace PlogBot.Processing.DispatchEventProcessors
                 .Where((item, index) => index >= rolesStartingArg && Regex.IsMatch(item, RegexConstants.MentionRegex))
                 .Select(x => x.StripMentionExtras()).ToList();
             await _alertService.CreateAlert(title, time, day, text, roles, _event.Message.ChannelId, _event.Message.Author.Id);
+            ReactRandomly();
         }
 
         private async Task ProcessAlertEdit(List<string> args)
@@ -753,6 +757,7 @@ namespace PlogBot.Processing.DispatchEventProcessors
                 .Where((item, index) => index >= rolesStartingArg && Regex.IsMatch(item, RegexConstants.MentionRegex))
                 .Select(x => x.StripMentionExtras()).ToList();
             await _alertService.ModifyAlert(title, time, day, text, roles, _event.Message.ChannelId);
+            ReactRandomly();
         }
 
         private async Task ProcessAlertDelete(List<string> args)
@@ -764,6 +769,7 @@ namespace PlogBot.Processing.DispatchEventProcessors
             }
             
             await _alertService.RetireAlert(args[0]);
+            ReactRandomly();
         }
 
         private Task SendAlertCommandEmbed()
@@ -799,6 +805,22 @@ namespace PlogBot.Processing.DispatchEventProcessors
             await _messageService.SendMessage(_event.Message.ChannelId, new OutgoingMessage
             {
                 Content = $"Your time zone has been set to \"{timeZone}\"."
+            });
+        }
+
+        private void ReactRandomly()
+        {
+            // TODO: Cache this stuff? Too many requests needed.
+            Task.Run(async () => {
+                var channel = await _messageService.GetChannel(_event.Message.ChannelId);
+                var emojis = await _guildService.GetGuildEmoji(channel.GuildId.Value);
+                if (emojis.Count == 0)
+                {
+                    return;
+                }
+                var random = new Random();
+                var index = random.Next(0, emojis.Count);
+                await _messageService.CreateReactionAsync(_event.Message.ChannelId, _event.Message.Id, emojis[index].Id);
             });
         }
     }

@@ -41,12 +41,12 @@ namespace PlogBot.DataSync
                 try
                 {
                     await SaveNewLogs();
+                    await Task.Delay(900000);
                 }
                 catch (Exception ex)
                 {
                     await _loggingService.LogErrorAsync(ex.StackTrace);
                 }
-                await Task.Delay(10000);
             }
         }
 

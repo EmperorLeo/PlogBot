@@ -18,5 +18,8 @@ namespace PlogBot.Services.DiscordObjects
         public DateTime JoinedAt { get; set; }
         [JsonProperty("deaf")]
         public bool Deaf { get; set; }
+        // Extra field for GuildMemberAdd
+        [JsonProperty("guild_id")]
+        public ulong? GuildId { get; set; }
     }
 }

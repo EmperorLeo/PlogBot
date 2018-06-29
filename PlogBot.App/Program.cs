@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PlogBot.Configuration;
+using PlogBot.Data;
 using PlogBot.Listening.Interfaces;
 using System;
 using System.IO;
@@ -32,6 +34,12 @@ namespace PlogBot.App
                 .AddOptions()
                 .AddPlogBotServices()
                 .BuildServiceProvider();
+
+            using (var scope = provider.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetService<PlogDbContext>();
+                dbContext.Database.Migrate();
+            }
             var listener = provider.GetService<IListener>();
 
             Console.WriteLine("Waiting for events from the Ploggystyle server...");

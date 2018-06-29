@@ -38,6 +38,8 @@ namespace PlogBot.App
             services.AddSingleton<IRaffleService, RaffleService>();
             services.AddTransient<IAlertService, AlertService>();
             services.AddTransient<ITimeZoneService, TimeZoneService>();
+            services.AddSingleton<IGuildService, GuildService>();
+            services.AddTransient<IPowerService, PowerService>();
 
             // HttpClient Singletons
             services.AddSingleton<IDiscordApiClient, DiscordApiClient>();
@@ -53,6 +55,7 @@ namespace PlogBot.App
             services.AddScoped<IUnimplementedEventDataService, UnimplementedEventDataService>();
             services.AddScoped<IEventProcessor<MessageCreate>, MessageCreateProcessor>();
             services.AddScoped<IEventProcessor<TypingStarted>, TypingStartedProcessor>();
+            services.AddScoped<IEventProcessor<GuildMemberAdd>, GuildMemberAddProcessor>();
 
             // DB
             var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);

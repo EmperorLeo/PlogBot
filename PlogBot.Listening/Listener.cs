@@ -1,5 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using PlogBot.Configuration;
 using PlogBot.Listening.Interfaces;
+using PlogBot.Processing;
+using PlogBot.Processing.EventDataServices.Models;
 using PlogBot.Processing.Interfaces;
 using PlogBot.Services.Interfaces;
 using System;
@@ -33,44 +38,26 @@ namespace PlogBot.Listening
             //var _ = Task.Run(() => ListenInternal(), cancellationSource.Token);
 
             var gateway = await _gatewayService.GetGateway();
-            using (var ws = new ClientWebSocket())
-            {
-                await ws.ConnectAsync(new Uri(gateway.Url), CancellationToken.None);
-
-                while (ws.State == WebSocketState.Open)
-                {
-                    var endOfMessage = false;
-                    var sb = new StringBuilder();
-                    while(!endOfMessage)
-                    {
-                        var bytesReceived = new ArraySegment<byte>(new byte[receiveChunkSize]);
-                        var result = await ws.ReceiveAsync(bytesReceived, CancellationToken.None);
-                        sb.Append(_utilityService.FromArraySegmentBytes(bytesReceived));
-                        endOfMessage = result.EndOfMessage;
-                    }
-                    await _payloadProcessor.Process(sb.ToString(), ws);
-                }
-            }
-
-            //cancellationSource.Cancel();
-        }
-
-        public async Task ListenInternal()
-        {
-            var pipeServer = new NamedPipeServerStream("plogpipe", PipeDirection.In);
+            // Loop forever, never want to stop trying to reconnect
             while (true)
             {
-                await pipeServer.WaitForConnectionAsync();
-                try
+                using (var ws = new ClientWebSocket())
                 {
-                    var bytes = new byte[256];
-                    await pipeServer.ReadAsync(bytes, 0, 256);
-                    var result = JsonConvert.DeserializeAnonymousType(Encoding.UTF8.GetString(bytes), new { MessageType="", InactivePlog="" });
-                    Console.WriteLine(result.InactivePlog);
-                }
-                catch
-                {
-                    Console.WriteLine("MASSIVE ERROR!!");
+                    await ws.ConnectAsync(new Uri(gateway.Url), CancellationToken.None);
+
+                    while (ws.State == WebSocketState.Open)
+                    {
+                        var endOfMessage = false;
+                        var sb = new StringBuilder();
+                        while(!endOfMessage)
+                        {
+                            var bytesReceived = new ArraySegment<byte>(new byte[receiveChunkSize]);
+                            var result = await ws.ReceiveAsync(bytesReceived, CancellationToken.None);
+                            sb.Append(_utilityService.FromArraySegmentBytes(bytesReceived));
+                            endOfMessage = result.EndOfMessage;
+                        }
+                        await _payloadProcessor.Process(sb.ToString(), ws);
+                    }
                 }
             }
         }

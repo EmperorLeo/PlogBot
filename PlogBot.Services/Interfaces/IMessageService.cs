@@ -10,5 +10,8 @@ namespace PlogBot.Services.Interfaces
         Task SendMessageWithAttachment(ulong channelId, OutgoingMessage message);
         
         Task DeleteMessageAsync(ulong channelId, ulong messageId);
+
+        Task CreateReactionAsync(ulong channelId, ulong messageId, ulong emojiId);
+        Task<Channel> GetChannel(ulong channelId);
     }
 }

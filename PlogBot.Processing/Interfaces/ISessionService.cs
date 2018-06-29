@@ -7,5 +7,6 @@ namespace PlogBot.Processing.Interfaces
         string SessionId { get; set; }
         DateTime? LastHeartbeatAck { get; set; }
         int? LastSequenceNumber { get; set; }
+        bool Reconnect { get; set; }
     }
 }

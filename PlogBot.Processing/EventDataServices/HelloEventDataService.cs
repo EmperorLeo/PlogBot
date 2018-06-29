@@ -27,23 +27,44 @@ namespace PlogBot.Processing.EventDataServices
         {
             _hello = JsonConvert.DeserializeObject<Hello>(payload.Data.ToString());
 
-            var identify = new Payload
+            if (_sessionService.Reconnect)
             {
-                Opcode = 2,
-                Data = JObject.FromObject(new Identify
+                var resume = new Payload 
                 {
-                    Token = token,
-                    Properties = new Properties
+                    Opcode = 6,
+                    Data = JObject.FromObject(new Resume
                     {
-                        OperatingSystem = "windows",
-                        Browser = "disco",
-                        Device = "disco"
-                    }
-                })
-            };
+                        SessionId = _sessionService.SessionId,
+                        Token = token,
+                        SequenceNumber = _sessionService.LastSequenceNumber.HasValue ? _sessionService.LastSequenceNumber.Value : 0
+                    })
+                };
+                var arraySegment = new ArraySegment<byte>(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(resume)));
+                await ws.SendAsync(arraySegment, WebSocketMessageType.Binary, true, CancellationToken.None);
+                await _loggingService.LogAsync("Reconnected.");
+            }
+            else
+            {
+                var identify = new Payload
+                {
+                    Opcode = 2,
+                    Data = JObject.FromObject(new Identify
+                    {
+                        Token = token,
+                        Properties = new Properties
+                        {
+                            OperatingSystem = "windows",
+                            Browser = "disco",
+                            Device = "disco"
+                        }
+                    })
+                };
 
-            await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(identify))), WebSocketMessageType.Binary, true, CancellationToken.None);
-            await _loggingService.LogAsync("Identified the session.");
+                await ws.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(identify))), WebSocketMessageType.Binary, true, CancellationToken.None);
+                await _loggingService.LogAsync("Identified the session.");
+                // Now that we have identified, next time this method is called we want to reconnect.
+                _sessionService.Reconnect = true;
+            }
 
             // Setup task to keep heartbeating
             var heartbeatCancellationTokenSource = new CancellationTokenSource();
@@ -57,7 +78,9 @@ namespace PlogBot.Processing.EventDataServices
                     if (_sessionService.LastHeartbeatAck.HasValue && _sessionService.LastHeartbeatAck.Value.AddMilliseconds(_hello.HeartbeatInterval * 2) < DateTime.UtcNow)
                     {
                         // TODO: try to reconnect?
-                        await _loggingService.LogErrorAsync("NEED TO FIGURE OUT HOW TO RECONNECT HERE");
+                        await _loggingService.LogAsync("Closing websocket, attempting to reconnect...");
+                        await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Discord won't send me heartbeats.", CancellationToken.None);
+                        heartbeatCancellationTokenSource.Cancel();
                     }
                     try
                     {

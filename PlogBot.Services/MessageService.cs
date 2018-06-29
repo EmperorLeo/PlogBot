@@ -20,10 +20,25 @@ namespace PlogBot.Services
             _discordApiClient = discordApiClient;
         }
 
+        public Task CreateReactionAsync(ulong channelId, ulong messageId, ulong emojiId)
+        {
+            var client = _discordApiClient.BotAuth();
+            var content = new StringContent("", Encoding.UTF8, "application/json");
+            return client.PutAsync($"{DiscordApiConstants.BaseUrl}/channels/{channelId}/messages/{messageId}/reactions/:emoji:{emojiId}/@me", content);
+        }
+
         public Task DeleteMessageAsync(ulong channelId, ulong messageId)
         {
             var client = _discordApiClient.BotAuth();
             return client.DeleteAsync($"{DiscordApiConstants.BaseUrl}/channels/{channelId}/messages/{messageId}");
+        }
+
+        public async Task<Channel> GetChannel(ulong channelId)
+        {
+            var client = _discordApiClient.BotAuth();
+            var response = await client.GetAsync($"{DiscordApiConstants.BaseUrl}/channels/{channelId}");
+            response.EnsureSuccessStatusCode();
+            return JsonConvert.DeserializeObject<Channel>(await response.Content.ReadAsStringAsync());
         }
 
         public Task SendMessage(ulong channelId, OutgoingMessage message)

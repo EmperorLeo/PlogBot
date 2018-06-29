@@ -25,8 +25,22 @@ namespace PlogBot.Services
             _timeZoneService = timeZoneService;
         }
 
-        public Task BlastAlert(string name, string text, List<ulong> roles, ulong channel)
+        public Task BlastAlert(string name, string text, int time, List<ulong> roles, ulong channel)
         {
+            var curDate = DateTime.UtcNow;
+            var totalDayTime =  curDate.Minute + curDate.Hour * 60;
+            var diff = time - totalDayTime;
+            if (diff < -15)
+            {
+                diff += 1440; 
+            }
+
+            var whenString = "NOW!";
+            if (Math.Abs(diff) > 1)
+            {
+                whenString = $"in {diff} minutes.";
+            }
+
             var message = new OutgoingMessage
             {
                 Content = $"Calling all ",
@@ -35,11 +49,28 @@ namespace PlogBot.Services
                     Title = name,
                     Description = text,
                     Timestamp = DateTime.UtcNow,
-                    Color = HexConstants.Green
+                    Color = HexConstants.Green,
+                    Fields = new List<EmbedField>
+                    {
+                        new EmbedField
+                        {
+                            Name = "Starting",
+                            Value = whenString
+                        }
+                    }
                 }
             };
-            roles.ForEach(r => message.Content += ($"<@&{r}> "));
-            message.Content += "!";
+
+            if (!roles.Any())
+            {
+                message.Content = null;
+            }
+            else
+            {
+                roles.ForEach(r => message.Content += ($"<@&{r}> "));
+                message.Content += "!";
+            }
+
             return _messageService.SendMessage(channel, message);
         }
 

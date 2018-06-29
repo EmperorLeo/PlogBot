@@ -11,7 +11,7 @@ namespace PlogBot.Services.Interfaces
          Task ModifyAlert(string name, int time, int? day, string text, List<ulong> roles, ulong channel);
          Task RetireAlert(string name);
          Task<List<Alert>> GetReadyAlerts();
-         Task BlastAlert(string name, string text, List<ulong> roles, ulong channel);
+         Task BlastAlert(string name, string text, int time, List<ulong> roles, ulong channel);
          Embed GetAlertEmbed();
     }
 }
