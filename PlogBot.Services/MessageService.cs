@@ -41,11 +41,12 @@ namespace PlogBot.Services
             return JsonConvert.DeserializeObject<Channel>(await response.Content.ReadAsStringAsync());
         }
 
-        public Task SendMessage(ulong channelId, OutgoingMessage message)
+        public async Task SendMessage(ulong channelId, OutgoingMessage message)
         {
             var client = _discordApiClient.BotAuth();
-            return client.PostAsync($"{DiscordApiConstants.BaseUrl}/channels/{channelId}/messages",
+            var result = await client.PostAsync($"{DiscordApiConstants.BaseUrl}/channels/{channelId}/messages",
                 new StringContent(JsonConvert.SerializeObject(message), Encoding.UTF8, "application/json"));
+            result.EnsureSuccessStatusCode();
         }
 
         public Task SendMessageWithAttachment(ulong channelId, OutgoingMessage message)

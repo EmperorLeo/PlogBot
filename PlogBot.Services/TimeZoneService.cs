@@ -113,7 +113,7 @@ namespace PlogBot.Services
             {
                 if (localDays.HasValue)
                 {
-                    if (localDays == 7)
+                    if (localDays == 6)
                     {
                         localDays = 0;
                     }
@@ -130,7 +130,7 @@ namespace PlogBot.Services
                 {
                     if (localDays == 0)
                     {
-                        localDays = 7;
+                        localDays = 6;
                     }
                     else
                     {

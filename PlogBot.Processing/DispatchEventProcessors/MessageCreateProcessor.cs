@@ -409,7 +409,7 @@ namespace PlogBot.Processing.DispatchEventProcessors
                 {
                     Name = main.RealName,
                     Url = $"http://na-bns.ncsoft.com/ingame/bs/character/profile?c={HttpUtility.UrlEncode(main.Name)}",
-                    IconUrl = user.Avatar
+                    IconUrl = user.Avatar != null ? $"https://cdn.discordapp.com/avatars/{user.Id}/{user.Avatar}.jpg" : null
                 },
                 Footer = new EmbedItem
                 {
