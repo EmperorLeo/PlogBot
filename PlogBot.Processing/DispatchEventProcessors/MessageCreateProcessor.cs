@@ -93,6 +93,10 @@ namespace PlogBot.Processing.DispatchEventProcessors
             else if (_event.Message.Author.Id == DiscordUserConstants.KashId && _bannedKashPhrases.Contains(Regex.Replace(_event.Message.Content, "\\.?\\??\\!?", "").Trim().ToLower()))
             {
                 await _messageService.DeleteMessageAsync(_event.Message.ChannelId, _event.Message.Id);
+                await _messageService.SendMessage(_event.Message.ChannelId, new OutgoingMessage
+                {
+                    Content = $"<@{DiscordUserConstants.KashId}> No."
+                });
             }
         }
 
